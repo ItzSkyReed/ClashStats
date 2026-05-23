@@ -1,0 +1,119 @@
+﻿using Application.DTOs.Clans;
+using Application.DTOs.Clans.Capital;
+using Application.DTOs.Clans.ClanWarLeagues;
+using Application.DTOs.Clans.ClanWars;
+using Application.Interfaces;
+using Domain.Constants;
+using Microsoft.AspNetCore.WebUtilities;
+
+namespace Infrastructure.Api;
+
+public partial class ClashApiClient
+{
+    public async Task<IApiResult<ClanDto>> GetClanAsync(string clanTag)
+    {
+        var encoded = Uri.EscapeDataString(clanTag);
+        return await _executor.GetAsync<ClanDto>($"clans/{encoded}");
+    }
+
+    public async Task<IApiResult<ClanMemberListDto>> GetClanMembersAsync(
+        string clanTag, uint? limit = null, string? after = null, string? before = null)
+    {
+        ValidateExclusiveBeforeAfter(before, after);
+
+        var encodedTag = Uri.EscapeDataString(clanTag);
+
+        var queryParams = new Dictionary<string, string?>();
+
+        AddQueryParam(queryParams, "limit", limit);
+        AddQueryParam(queryParams, "after", after);
+        AddQueryParam(queryParams, "before", before);
+
+        var endpoint = QueryHelpers.AddQueryString($"clans/{encodedTag}/members", queryParams);
+
+        return await _executor.GetAsync<ClanMemberListDto>(endpoint);
+    }
+
+    public async Task<IApiResult<ClanCapitalRaidSeasonsDto>> GetClanCapitalRaidSeasonsAsync(
+        string clanTag, uint? limit = null, string? after = null, string? before = null)
+    {
+        ValidateExclusiveBeforeAfter(before, after);
+
+        var encodedTag = Uri.EscapeDataString(clanTag);
+
+        var queryParams = new Dictionary<string, string?>();
+
+        AddQueryParam(queryParams, "limit", limit);
+        AddQueryParam(queryParams, "after", after);
+        AddQueryParam(queryParams, "before", before);
+
+        var endpoint = QueryHelpers.AddQueryString($"clans/{encodedTag}/capitalraidseasons", queryParams);
+
+        return await _executor.GetAsync<ClanCapitalRaidSeasonsDto>(endpoint);
+    }
+
+    public async Task<IApiResult<ClanWarLogDto>> GetClanWarLogAsync(
+        string clanTag, uint? limit = null, string? after = null, string? before = null)
+    {
+        ValidateExclusiveBeforeAfter(before, after);
+
+        var encodedTag = Uri.EscapeDataString(clanTag);
+
+        var queryParams = new Dictionary<string, string?>();
+
+        AddQueryParam(queryParams, "limit", limit);
+        AddQueryParam(queryParams, "after", after);
+        AddQueryParam(queryParams, "before", before);
+
+        var endpoint = QueryHelpers.AddQueryString($"clans/{encodedTag}/warlog", queryParams);
+
+        return await _executor.GetAsync<ClanWarLogDto>(endpoint);
+    }
+
+    public async Task<IApiResult<ClanWarDto>> GetCurrentClanWarAsync(string clanTag)
+    {
+        var encoded = Uri.EscapeDataString(clanTag);
+        return await _executor.GetAsync<ClanWarDto>($"clans/{encoded}/currentwar");
+    }
+
+    public async Task<IApiResult<ClanListDto>> GetClansAsync(
+        string? name = null, WarFrequency? warFrequency = null, uint? limit = null, uint? locationId = null,
+        string? after = null, string? before = null, uint? maxMembers = null, uint? minMembers = null,
+        uint? minClanPoints = null, uint? minClanLevel = null, List<uint>? labelIds = null)
+    {
+        if (name is not null && name.Length < 3)
+            throw new ArgumentException("Name must be at least 3 characters long if present");
+
+        ValidateExclusiveBeforeAfter(before, after);
+
+        var queryParams = new Dictionary<string, string?>();
+
+        AddQueryParam(queryParams, "name", name);
+        AddQueryParam(queryParams, "warFrequency", warFrequency);
+        AddQueryParam(queryParams, "limit", limit);
+        AddQueryParam(queryParams, "locationId", locationId);
+        AddQueryParam(queryParams, "after", after);
+        AddQueryParam(queryParams, "before", before);
+        AddQueryParam(queryParams, "maxMembers", maxMembers);
+        AddQueryParam(queryParams, "minMembers", minMembers);
+        AddQueryParam(queryParams, "minClanPoints", minClanPoints);
+        AddQueryParam(queryParams, "minClanLevel", minClanLevel);
+        AddQueryParam(queryParams, "labelIds", labelIds);
+
+        var endpoint = QueryHelpers.AddQueryString("clans", queryParams);
+
+        return await _executor.GetAsync<ClanListDto>(endpoint);
+    }
+
+    public async Task<IApiResult<ClanWarLeagueGroupDto>> GetCurrentClanWarLeagueGroupAsync(string clanTag)
+    {
+        var encodedTag = Uri.EscapeDataString(clanTag);
+        return await _executor.GetAsync<ClanWarLeagueGroupDto>($"clans/{encodedTag}/currentwar/leaguegroup");
+    }
+
+    public async Task<IApiResult<ClanWarLeagueGroupDto>> GetClanWarLeagueWarAsync(string warTag)
+    {
+        var encodedTag = Uri.EscapeDataString(warTag);
+        return await _executor.GetAsync<ClanWarLeagueGroupDto>($"clans/clanwarleagues/wars/{encodedTag}");
+    }
+}

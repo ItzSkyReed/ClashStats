@@ -1,0 +1,83 @@
+﻿using Application.Interfaces;
+
+namespace App.Workers;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServiceProvider serviceProvider) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken ct)
+    {
+        logger.LogInformation("Worker loaded.");
+
+        var clanMembersTask = RunTaskWithTimerAsync(
+            TimeSpan.FromMinutes(5),
+            collector => collector.UpdateClanMembers(ct),
+            "ClanMembers", ct);
+
+        var clanWarTask = RunTaskWithTimerAsync(
+            TimeSpan.FromMinutes(1),
+            async collector =>
+            {
+                var hasChanges = await collector.UpdateClanWar(ct);
+
+                if (hasChanges)
+                {
+                    // Refreshing Materialized views
+                    await collector.RefreshMaterializedViews(ct);
+
+                }
+            },
+            "ClanWarAndViews", ct);
+
+        var seasonStatsTask = RunTaskWithTimerAsync(
+            TimeSpan.FromMinutes(10),
+            collector => collector.UpdateSeasonStats(ct),
+            "SeasonStats", ct);
+
+        var cleanupStuckWarsTask = RunTaskWithTimerAsync(
+            TimeSpan.FromMinutes(10),
+            collector => collector.CleanupStuckWars(ct),
+            "StuckWars", ct);
+
+
+        await Task.WhenAll(clanMembersTask, seasonStatsTask, clanWarTask, cleanupStuckWarsTask);
+    }
+
+    private async Task RunTaskWithTimerAsync(TimeSpan period, Func<IClanDataSyncService, Task> action, string taskName, CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(period);
+        try
+        {
+            while (await timer.WaitForNextTickAsync(ct))
+            {
+                try
+                {
+                    LogExecutingBackgroundTaskTaskName(taskName);
+                    using var scope = serviceProvider.CreateScope();
+                    var collector = scope.ServiceProvider.GetRequiredService<IClanDataSyncService>();
+
+                    await action(collector);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error executing task: {TaskName}", taskName);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            LogStoppingTaskTaskName(taskName);
+        }
+    }
+
+    [LoggerMessage(LogLevel.Information, "Executing background task: {TaskName}")]
+    partial void LogExecutingBackgroundTaskTaskName(string taskName);
+
+    [LoggerMessage(LogLevel.Information, "Stopping task {TaskName}...")]
+    partial void LogStoppingTaskTaskName(string taskName);
+}

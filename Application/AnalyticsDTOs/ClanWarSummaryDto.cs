@@ -1,0 +1,45 @@
+﻿using Domain.Constants;
+
+namespace Application.AnalyticsDTOs;
+
+public record ClanWarSummaryDto
+{
+    public int Id { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public short TeamSize { get; set; }
+    public string OpponentClanName { get; set; } = string.Empty;
+    public short OpponentClanLevel { get; set; }
+    public short OpponentAttacks { get; set; }
+    public short OurAttacks { get; set; }
+    public short OurStars { get; set; }
+    public short OpponentStars { get; set; }
+    public float OurDestructionPercentage { get; set; }
+    public float OpponentDestructionPercentage { get; set; }
+    public short ExpEarned { get; set; }
+
+    public ClanWarResult Result
+    {
+        get
+        {
+            if (OurStars != OpponentStars)
+                return OurStars > OpponentStars ? ClanWarResult.Win : ClanWarResult.Lose;
+
+            var destructionDelta = OurDestructionPercentage - OpponentDestructionPercentage;
+
+            return destructionDelta switch
+            {
+                > 0.01f => ClanWarResult.Win,
+                < -0.01f => ClanWarResult.Lose,
+                _ => ClanWarResult.Tie
+            };
+        }
+    }
+
+    public float AverageOurTownHall { get; set; }
+    public float AverageOpponentTownHall { get; set; }
+    public float TownHallAdvantage { get; set; }
+    public float ParticipationRate { get; set; }
+    public short OurThreeStarsCount { get; set; }
+    public float StarsPerAttack { get; set; }
+}
