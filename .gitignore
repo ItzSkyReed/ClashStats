@@ -1,4 +1,4 @@
-﻿﻿# Common IntelliJ Platform excludes
+﻿
 *.suo
 *.user
 .vs/
@@ -16,14 +16,10 @@ cmake-build-*/
 out/
 .idea_modules/
 atlassian-ide-plugin.xml
-.idea/replstate.xml
-.idea/sonarlint/
 com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-.idea/httpRequests
-.idea/caches/build_file_checksums.ser
 Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
@@ -37,3 +33,4 @@ $RECYCLE.BIN/
 *.msp
 *.lnk
 .env
+.idea
