@@ -27,5 +27,5 @@ public sealed class ClanWarState : SmartEnum<ClanWarState, string>
     public static readonly ClanWarState War = new(nameof(War), "war");
 
     public static readonly ClanWarState InWar = new(nameof(InWar), "inWar");
-    public static readonly ClanWarState Ended = new(nameof(Ended), "ended");
+    public static readonly ClanWarState WarEnded = new(nameof(WarEnded), "warEnded");
 }
