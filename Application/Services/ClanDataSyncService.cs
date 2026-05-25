@@ -116,7 +116,7 @@ public class ClanDataSyncService(
         await dbContext.SaveChangesAsync(ct);
     }
 
-    private static readonly ClanWarState[] ActiveWarStates = [ClanWarState.InWar, ClanWarState.Ended];
+    private static readonly ClanWarState[] ActiveWarStates = [ClanWarState.InWar, ClanWarState.WarEnded];
 
     public async Task<bool> UpdateClanWar(CancellationToken ct)
     {

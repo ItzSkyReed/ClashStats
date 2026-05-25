@@ -19,7 +19,7 @@ namespace Infrastructure.Migrations
                         cw.""StartTime""
                     FROM public.clan_war_player_performances cwpp
                     JOIN public.clan_wars cw ON cw.""Id"" = cwpp.""WarId""
-                    WHERE cw.""State"" = 'Ended'
+                    WHERE cw.""State"" = 'warEnded'
                 ),
 
                 unpivoted_attacks AS (
@@ -83,8 +83,8 @@ namespace Infrastructure.Migrations
                         AVG(""TownHallLevel"")::real AS avg_th,
                         (SUM(attacks_used)::real / NULLIF(COUNT(*) * 2, 0)) * 100 AS attack_participation_rate,
                         AVG(total_stars)::real AS avg_stars_per_war,
-                        (SUM(first_attack_used)::real / NULLIF(COUNT(*), 0)) * 100 AS first_attack_participation_rate,
-                        (SUM(second_attack_used)::real / NULLIF(COUNT(*), 0)) * 100 AS second_attack_participation_rate
+                        ((SUM(first_attack_used)::real / NULLIF(COUNT(*), 0)) * 100)::real AS first_attack_participation_rate,
+                        ((SUM(second_attack_used)::real / NULLIF(COUNT(*), 0)) * 100)::real AS second_attack_participation_rate
                     FROM player_war_stats
                     GROUP BY ""PlayerTag""
                 ),
@@ -113,16 +113,17 @@ namespace Infrastructure.Migrations
                     COALESCE(wm.attack_participation_rate, 0) AS attack_participation_rate,
                     COALESCE(am.avg_destruction, 0) AS average_destruction_percentage,
                     COALESCE(wm.avg_stars_per_war, 0) AS average_stars_per_war,
-                    COALESCE(wm.first_attack_participation_rate, 0) AS first_attack_participation_rate,
-                    COALESCE(wm.second_attack_participation_rate, 0) AS second_attack_participation_rate,
-                    COALESCE(am.mirror_rate, 0) AS mirror_attacks_rate,
-                    COALESCE(am.same_th_3star_rate, 0) AS three_star_rate_against_same_th,
+                    COALESCE(wm.first_attack_participation_rate, 0)::real AS first_attack_participation_rate,
+                    COALESCE(wm.second_attack_participation_rate, 0)::real AS second_attack_participation_rate,
+                    COALESCE(am.mirror_rate, 0)::real AS mirror_attacks_rate,
+                    COALESCE(am.same_th_3star_rate, 0)::real AS three_star_rate_against_same_th,
                     COALESCE(am.avg_th_mismatch, 0) AS average_th_mismatches,
                     COALESCE(rwa.recent_wars_attacks, ARRAY[]::smallint[]) AS recent_wars_attacks
                 FROM public.clan_members cm
                 LEFT JOIN war_metrics wm ON wm.""PlayerTag"" = cm.""Tag""
                 LEFT JOIN attack_metrics am ON am.""PlayerTag"" = cm.""Tag""
-                LEFT JOIN recent_wars_array rwa ON rwa.""PlayerTag"" = cm.""Tag"";
+                LEFT JOIN recent_wars_array rwa ON rwa.""PlayerTag"" = cm.""Tag""
+                WHERE cm.""IsNowInClan"" = true;
 
                 CREATE UNIQUE INDEX idx_mv_clan_war_player_summaries_tag 
                 ON mv_clan_war_player_summaries(tag);

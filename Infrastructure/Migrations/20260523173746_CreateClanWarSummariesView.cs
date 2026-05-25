@@ -64,7 +64,7 @@ namespace Infrastructure.Migrations
                 LEFT JOIN our_stats os ON os.""WarId"" = cw.""Id""
                 LEFT JOIN opponent_avg_th oa ON oa.""WarId"" = cw.""Id""
                 
-                WHERE cw.""State"" = 'ended';
+                WHERE cw.""State"" = 'warEnded';
 
                 CREATE UNIQUE INDEX idx_mv_clan_war_summaries_id ON mv_clan_war_summaries(""Id"");
             ");
