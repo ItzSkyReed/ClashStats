@@ -13,6 +13,6 @@ public record ClanWarDto
     public required DateTime StartTime{ get; init; }
     public required DateTime EndTime{ get; init; }
     public required WarClanDto Clan{ get; init; }
-    public required WarClanDto Opponent{ get; init; }
+    public WarClanDto? Opponent{ get; init; }
     public PagingDto? Paging { get; init; }
 }
