@@ -203,8 +203,10 @@ public class ClanDataSyncService(
     {
         var timeThreshold = DateTime.UtcNow.AddHours(-1);
 
+        var thresholdUnspecified = DateTime.SpecifyKind(timeThreshold, DateTimeKind.Unspecified);
+
         var stuckWars = await dbContext.ClanWars
-            .Where(cw => cw.State != ClanWarState.WarEnded && cw.EndTime < timeThreshold)
+            .Where(cw => cw.State != ClanWarState.WarEnded && cw.EndTime < thresholdUnspecified)
             .ToListAsync(ct);
 
         if (stuckWars.Count == 0)
