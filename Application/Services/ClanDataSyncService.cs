@@ -73,9 +73,13 @@ public class ClanDataSyncService(
         if (leagueData is null)
             return;
 
-        var latestSeason = DateOnly.ParseExact(leagueData.Items[^1].Id,
-            "yyyy-MM-dd",
-            System.Globalization.CultureInfo.InvariantCulture);
+        var parsedDateTime = DateTimeOffset.ParseExact(
+            leagueData.Items[^1].Id,
+            "'v2-'yyyy-MM-dd'T'HH:mm:ss'Z'",
+            System.Globalization.CultureInfo.InvariantCulture
+        );
+
+        var latestSeason = DateOnly.FromDateTime(parsedDateTime.UtcDateTime);
 
         var clanMembers = await GetClanMembers(clanTag);
         if (clanMembers is null)
