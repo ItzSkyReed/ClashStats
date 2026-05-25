@@ -22,21 +22,15 @@ public class Program
     {
         var builder = Host.CreateApplicationBuilder(args);
 
-        // 1. Настройка конфигурации
         builder.Configuration.AddEnvironmentVariables();
 
-        // 2. Регистрация сервисов (Dependency Injection)
         ConfigureServices(builder);
 
-        // 3. Сборка хоста
         using var host = builder.Build();
 
         await ApplyMigrations(host.Services);
 
-        // 4. Выполнение основной логики
-        await RunAppLogicAsync(host.Services);
 
-        // Запуск хоста (если есть BackgroundServices, они начнут работать здесь)
         await host.RunAsync();
     }
 
@@ -90,7 +84,6 @@ public class Program
             });
         });
 
-        // Настройка БД
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -99,7 +92,6 @@ public class Program
         builder.Services.AddScoped<IAppDbContext>(provider =>
             provider.GetRequiredService<AppDbContext>());
 
-        // Регистрация API клиента
         builder.Services.AddScoped<IClashApiClient, ClashApiClient>();
 
         builder.Services.AddScoped<IClanDataSyncService, ClanDataSyncService>();
@@ -123,31 +115,6 @@ public class Program
             logger.LogError(ex, "Error while applying migrations.");
 
             throw;
-        }
-    }
-
-    private static async Task RunAppLogicAsync(IServiceProvider services)
-    {
-        using var scope = services.CreateScope();
-
-        var api = scope.ServiceProvider.GetRequiredService<IClashApiClient>();
-
-        try
-        {
-            var result = await api.GetClanMembersAsync("#29RJ28YLG");
-
-            if (result.Data is { } clan)
-            {
-                Console.WriteLine($"Получен клан: {clan}");
-            }
-            else if (result.Error is { } error)
-            {
-                Console.WriteLine($"Ошибка: {error.Message}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Произошло исключение: {ex.Message}");
         }
     }
 }
