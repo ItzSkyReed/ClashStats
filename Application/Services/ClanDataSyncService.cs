@@ -125,7 +125,7 @@ public class ClanDataSyncService(
         if (clanWarData is null)
             return false;
 
-        if (!ActiveWarStates.Contains(clanWarData.State) || clanWarData.State == ClanWarState.Ended)
+        if (!ActiveWarStates.Contains(clanWarData.State))
             return false;
 
         var currentWar = await dbContext.ClanWars
@@ -204,7 +204,7 @@ public class ClanDataSyncService(
         var timeThreshold = DateTime.UtcNow.AddHours(-1);
 
         var stuckWars = await dbContext.ClanWars
-            .Where(cw => cw.State != ClanWarState.Ended && cw.EndTime < timeThreshold)
+            .Where(cw => cw.State != ClanWarState.WarEnded && cw.EndTime < timeThreshold)
             .ToListAsync(ct);
 
         if (stuckWars.Count == 0)
@@ -231,8 +231,8 @@ public class ClanDataSyncService(
             }
             else
             {
-                war.State = ClanWarState.Ended;
-                logger.LogError("War {WarId} against {Opponent} not found in WarLog! Forcibly set status to Ended without stats update.",
+                war.State = ClanWarState.WarEnded;
+                logger.LogError("War {WarId} against {Opponent} not found in WarLog! Forcibly set status to WarEnded without stats update.",
                     war.Id, war.OpponentClanName);
             }
         }
@@ -277,7 +277,7 @@ public class ClanDataSyncService(
 
     private static void UpdateClanWarData(ClanWar entity, ClanWarLogEntryDto apiData)
     {
-        entity.State = ClanWarState.Ended;
+        entity.State = ClanWarState.WarEnded;
         entity.EndTime = apiData.EndTime;
         if (entity.StartTime == DateTime.MinValue)
             entity.StartTime = apiData.EndTime - new TimeSpan(48, 0, 0); // Approximately
