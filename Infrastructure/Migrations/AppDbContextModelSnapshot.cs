@@ -258,6 +258,8 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("WarId", "PlayerTag");
 
+                    b.HasIndex("PlayerTag");
+
                     b.ToTable("clan_war_player_performances", (string)null);
                 });
 
@@ -284,11 +286,19 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Models.Clans.ClanWarPlayerPerformance", b =>
                 {
+                    b.HasOne("Domain.Models.Clans.ClanMember", "Member")
+                        .WithMany("ClanWarPerformances")
+                        .HasForeignKey("PlayerTag")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Domain.Models.Clans.ClanWar", "War")
                         .WithMany("PlayersPerformances")
                         .HasForeignKey("WarId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Member");
 
                     b.Navigation("War");
                 });
@@ -306,6 +316,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Models.Clans.ClanMember", b =>
                 {
+                    b.Navigation("ClanWarPerformances");
+
                     b.Navigation("SeasonStats");
                 });
 

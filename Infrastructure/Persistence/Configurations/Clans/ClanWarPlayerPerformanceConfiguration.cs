@@ -36,5 +36,10 @@ public class ClanWarPlayerPerformanceConfiguration : IEntityTypeConfiguration<Cl
             .HasForeignKey(x => x.WarId)
             .IsRequired();
 
+        builder.HasOne(x => x.Member)
+            .WithMany(cw => cw.ClanWarPerformances)
+            .HasForeignKey(x => x.PlayerTag)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

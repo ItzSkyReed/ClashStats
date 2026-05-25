@@ -22,4 +22,5 @@ public record ClanWarPlayerPerformance
     public short? Opponent2TownHallLevel { get; set; }
 
     public ClanWar? War { get; set; }
+    public ClanMember? Member { get; set; }
 }

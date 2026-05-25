@@ -43,4 +43,6 @@ public record ClanMember
     public WarPreference? WarPreference { get; set; }
 
     public ICollection<SeasonStats>? SeasonStats { get; set; } = new List<SeasonStats>();
+
+    public ICollection<ClanWarPlayerPerformance>? ClanWarPerformances { get; set; } = new List<ClanWarPlayerPerformance>();
 }
