@@ -27,12 +27,12 @@ public class Program
 
         ConfigureServices(builder);
 
-        using var host = builder.Build();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Russian Winners Stats API", Version = "v1" });
 
+            c.SchemaFilter<SmartEnumSchemaFilter>();
         });
 
         var app = builder.Build();
@@ -43,7 +43,6 @@ public class Program
 
         await ApplyMigrations(app.Services);
 
-        await host.RunAsync();
         app.MapEndpoints();
 
         await app.RunAsync();
