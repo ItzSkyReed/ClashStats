@@ -30,10 +30,10 @@ namespace Infrastructure.Migrations
                     b.Property<float>("AttackParticipationRate")
                         .HasColumnType("real");
 
-                    b.Property<float>("AvarageMapPosition")
+                    b.Property<float>("AverageMapPosition")
                         .HasColumnType("real");
 
-                    b.Property<float>("AvarageOpponentMapPosition")
+                    b.Property<float>("AverageOpponentMapPosition")
                         .HasColumnType("real");
 
                     b.Property<float>("AverageDestructionPercentage")

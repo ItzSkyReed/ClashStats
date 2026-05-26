@@ -4,8 +4,8 @@ public record ClanWarPlayerSummaryDto
 {
     public string Tag { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public float AvarageMapPosition { get; set; }
-    public float AvarageOpponentMapPosition { get; set; }
+    public float AverageMapPosition { get; set; }
+    public float AverageOpponentMapPosition { get; set; }
 
     public float AverageTownHallLevel { get; set; }
     public float AverageOpponentTownHallLevel { get; set; }
