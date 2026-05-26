@@ -1,7 +1,10 @@
-﻿using Ardalis.SmartEnum;
+﻿using System.Text.Json.Serialization;
+using Ardalis.SmartEnum;
+using Ardalis.SmartEnum.SystemTextJson;
 
 namespace Domain.Constants;
 
+[JsonConverter(typeof(SmartEnumValueConverter<ClanWarResult, string>))]
 public sealed class ClanWarResult : SmartEnum<ClanWarResult, string>
 {
     private ClanWarResult(string name, string value) : base(name, value) { }

@@ -42,11 +42,6 @@ public class Program
             options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.IncludeFields = true;
             options.Converters.Add(new ClashDateTimeConverter());
-            options.Converters.Add(new SmartEnumValueConverter<WarFrequency, string>());
-            options.Converters.Add(new SmartEnumValueConverter<ClanWarState, string>());
-            options.Converters.Add(new SmartEnumValueConverter<ClanWarLeagueState, string>());
-            options.Converters.Add(new SmartEnumValueConverter<ClanRole, string>());
-            options.Converters.Add(new SmartEnumValueConverter<WarPreference, string>());
         };
 
         builder.Services.Configure(configureJson);

@@ -1,10 +1,13 @@
-﻿using Ardalis.SmartEnum;
+﻿using System.Text.Json.Serialization;
+using Ardalis.SmartEnum;
+using Ardalis.SmartEnum.SystemTextJson;
 
 namespace Domain.Constants;
 
+[JsonConverter(typeof(SmartEnumValueConverter<WarFrequency, string>))]
 public sealed class WarFrequency : SmartEnum<WarFrequency, string>
 {
-    // Конструктор: передаем имя (для C#) и значение (строку из API)
+
     private WarFrequency(string name, string value) : base(name, value) { }
 
     public static readonly WarFrequency Unknown = new(nameof(Unknown), "unknown");
