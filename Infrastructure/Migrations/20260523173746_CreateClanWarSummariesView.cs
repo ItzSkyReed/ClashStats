@@ -56,9 +56,9 @@ namespace Infrastructure.Migrations
                     COALESCE(oa.avg_opp_th, 0) AS ""AverageOpponentTownHall"",
                     COALESCE(os.avg_our_th, 0) - COALESCE(oa.avg_opp_th, 0) AS ""TownHallAdvantage"",
                     
-                    (cw.""OurAttacks""::real / NULLIF(cw.""TeamSize"" * 2, 0)) * 100 AS ""ParticipationRate"",
+                    (cw.""OurAttacks""::real / NULLIF(cw.""TeamSize"" * 2, 0))::real * 100 AS ""ParticipationRate"",
                     COALESCE(os.three_stars_count, 0) AS ""OurThreeStarsCount"",
-                    (cw.""OurStars""::real / NULLIF(cw.""OurAttacks"", 0)) AS ""StarsPerAttack""
+                    (cw.""OurStars""::real / NULLIF(cw.""OurAttacks"", 0))::real AS ""StarsPerAttack""
 
                 FROM public.clan_wars cw
                 LEFT JOIN our_stats os ON os.""WarId"" = cw.""Id""
