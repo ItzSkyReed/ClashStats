@@ -10,8 +10,8 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-migrationBuilder.Sql(@"
-                CREATE MATERIALIZED VIEW ""MvClanWarPlayerSummaries"" AS
+        migrationBuilder.Sql(@"
+                CREATE MATERIALIZED VIEW ""mv_clan_war_player_summaries"" AS
                 
                 WITH ""EndedWarPerformances"" AS (
                     SELECT 
@@ -126,7 +126,7 @@ migrationBuilder.Sql(@"
                 WHERE Cm.""IsNowInClan"" = true;
 
                 CREATE UNIQUE INDEX idx_mv_clan_war_player_summaries_tag 
-                ON mv_clan_war_player_summaries(tag);
+                ON mv_clan_war_player_summaries(""Tag"");
             ");
         }
 
