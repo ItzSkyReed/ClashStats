@@ -1,8 +1,8 @@
 ﻿using Domain.Constants;
 
-namespace Application.AnalyticsDTOs;
+namespace Domain.Models.Analytics;
 
-public record ClanWarSummaryDto
+public record ClanWarSummary
 {
     public int Id { get; set; }
     public DateTime StartTime { get; set; }

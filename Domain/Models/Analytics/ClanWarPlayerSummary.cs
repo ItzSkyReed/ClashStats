@@ -1,6 +1,6 @@
-﻿namespace Application.AnalyticsDTOs;
+﻿namespace Domain.Models.Analytics;
 
-public record ClanWarPlayerSummaryDto
+public record ClanWarPlayerSummary
 {
     public string Tag { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
