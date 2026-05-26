@@ -146,7 +146,7 @@ public class ClanDataSyncService(
         currentWar.PlayersPerformances ??= [];
 
 
-        var opponentsLookup = clanWarData.Opponent.Members?
+        var opponentsLookup = clanWarData.Opponent!.Members?
             .ToDictionary(m => m.Tag) ?? [];
 
         foreach (var memberDto in clanWarData.Clan.Members!)
@@ -265,7 +265,7 @@ public class ClanDataSyncService(
         entity.ExpEarned = (short?)apiData.Clan.ExpEarned;
         entity.TeamSize = (short)apiData.TeamSize;
 
-        entity.OpponentAttacks = (short)apiData.Opponent.Attacks;
+        entity.OpponentAttacks = (short)apiData.Opponent!.Attacks;
         entity.OpponentClanLevel = (short)apiData.Opponent.ClanLevel;
         entity.OpponentClanName = apiData.Opponent.Name;
         entity.OpponentClanTag = apiData.Opponent.Tag;
