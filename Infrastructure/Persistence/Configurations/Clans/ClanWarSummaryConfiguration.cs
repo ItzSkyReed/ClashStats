@@ -1,12 +1,13 @@
-﻿namespace Infrastructure.Persistence.Configurations.Clans;
+﻿using Domain.Models.Analytics;
+
+namespace Infrastructure.Persistence.Configurations.Clans;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Application.AnalyticsDTOs; // Замени на свой namespace
 
-public class ClanWarSummaryConfiguration : IEntityTypeConfiguration<ClanWarSummaryDto>
+public class ClanWarSummaryConfiguration : IEntityTypeConfiguration<ClanWarSummary>
 {
-    public void Configure(EntityTypeBuilder<ClanWarSummaryDto> builder)
+    public void Configure(EntityTypeBuilder<ClanWarSummary> builder)
     {
         builder.ToView("mv_clan_war_summaries");
 

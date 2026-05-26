@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Domain.Models.Analytics;
 using Domain.Models.Clans;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,8 @@ public interface IAppDbContext
     public DbSet<ClanWar> ClanWars { get; set; }
     public DbSet<ClanWarPlayerPerformance> ClanWarPlayerPerformances { get; set; }
     public DbSet<SeasonStats> SeasonStats { get; set; }
+    public DbSet<ClanWarSummary>  ClanWarSummaries { get; set; }
+    public DbSet<ClanWarPlayerSummary>  ClanWarPlayerSummaries { get; set; }
 
     public Task RefreshPlayerSummariesViewAsync(CancellationToken ct = default);
     public Task RefreshClanWarSummariesViewAsync(CancellationToken ct = default);
