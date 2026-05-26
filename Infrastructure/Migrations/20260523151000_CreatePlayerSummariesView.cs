@@ -10,125 +10,124 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"
-                CREATE MATERIALIZED VIEW mv_clan_war_player_summaries AS
+migrationBuilder.Sql(@"
+                CREATE MATERIALIZED VIEW ""MvClanWarPlayerSummaries"" AS
                 
-                WITH ended_war_performances AS (
+                WITH ""EndedWarPerformances"" AS (
                     SELECT 
-                        cwpp.*, 
-                        cw.""StartTime""
-                    FROM public.clan_war_player_performances cwpp
-                    JOIN public.clan_wars cw ON cw.""Id"" = cwpp.""WarId""
-                    WHERE cw.""State"" = 'warEnded'
+                        Cwpp.*, 
+                        Cw.""StartTime""
+                    FROM public.clan_war_player_performances Cwpp
+                    JOIN public.clan_wars Cw ON Cw.""Id"" = Cwpp.""WarId""
+                    WHERE Cw.""State"" = 'warEnded'
                 ),
 
-                unpivoted_attacks AS (
+                ""UnpivotedAttacks"" AS (
                     SELECT 
                         ""WarId"", ""PlayerTag"", ""MapPosition"", ""TownHallLevel"",
-                        ""Attack1Stars"" AS stars, 
-                        ""Attack1Destruction"" AS destruction, 
-                        ""Opponent1Position"" AS opponent_position, 
-                        ""Opponent1TownHallLevel"" AS opponent_th
-                    FROM ended_war_performances
+                        ""Attack1Stars"" AS ""Stars"", 
+                        ""Attack1Destruction"" AS ""Destruction"", 
+                        ""Opponent1Position"" AS ""OpponentPosition"", 
+                        ""Opponent1TownHallLevel"" AS ""OpponentTh""
+                    FROM ""EndedWarPerformances""
                     WHERE ""Attack1Stars"" IS NOT NULL
                     
                     UNION ALL
                     
                     SELECT 
                         ""WarId"", ""PlayerTag"", ""MapPosition"", ""TownHallLevel"",
-                        ""Attack2Stars"" AS stars, 
-                        ""Attack2Destruction"" AS destruction, 
-                        ""Opponent2Position"" AS opponent_position, 
-                        ""Opponent2TownHallLevel"" AS opponent_th
-                    FROM ended_war_performances
+                        ""Attack2Stars"" AS ""Stars"", 
+                        ""Attack2Destruction"" AS ""Destruction"", 
+                        ""Opponent2Position"" AS ""OpponentPosition"", 
+                        ""Opponent2TownHallLevel"" AS ""OpponentTh""
+                    FROM ""EndedWarPerformances""
                     WHERE ""Attack2Stars"" IS NOT NULL
                 ),
                 
-                attack_metrics AS (
+                ""AttackMetrics"" AS (
                     SELECT 
                         ""PlayerTag"",
-                        AVG(opponent_position)::real AS avg_opponent_map_position,
-                        AVG(opponent_th)::real AS avg_opponent_th,
-                        AVG(destruction)::real AS avg_destruction,
+                        AVG(""OpponentPosition"")::real AS ""AvgOpponentMapPosition"",
+                        AVG(""OpponentTh"")::real AS ""AvgOpponentTh"",
+                        AVG(""Destruction"")::real AS ""AvgDestruction"",
                         
-                        (COUNT(*) FILTER (WHERE opponent_position = ""MapPosition"")::real / 
-                            NULLIF(COUNT(*), 0)) * 100 AS mirror_rate,
+                        (COUNT(*) FILTER (WHERE ""OpponentPosition"" = ""MapPosition"")::real / 
+                            NULLIF(COUNT(*), 0)) * 100 AS ""MirrorRate"",
                             
-                        (COUNT(*) FILTER (WHERE stars = 3 AND opponent_th = ""TownHallLevel"")::real / 
-                            NULLIF(COUNT(*) FILTER (WHERE opponent_th = ""TownHallLevel""), 0)) * 100 AS same_th_3star_rate,
+                        (COUNT(*) FILTER (WHERE ""Stars"" = 3 AND ""OpponentTh"" = ""TownHallLevel"")::real / 
+                            NULLIF(COUNT(*) FILTER (WHERE ""OpponentTh"" = ""TownHallLevel""), 0)) * 100 AS ""SameTh3StarRate"",
                             
-                        AVG(opponent_th - ""TownHallLevel"")::real AS avg_th_mismatch
-                    FROM unpivoted_attacks
+                        AVG(""OpponentTh"" - ""TownHallLevel"")::real AS ""AvgThMismatch""
+                    FROM ""UnpivotedAttacks""
                     GROUP BY ""PlayerTag""
                 ),
 
-                player_war_stats AS (
+                ""PlayerWarStats"" AS (
                     SELECT 
                         ""PlayerTag"",
                         ""StartTime"",
                         ""MapPosition"",
                         ""TownHallLevel"",
                         (CASE WHEN ""Attack1Stars"" IS NOT NULL THEN 1 ELSE 0 END + 
-                         CASE WHEN ""Attack2Stars"" IS NOT NULL THEN 1 ELSE 0 END)::smallint AS attacks_used,
-                        CASE WHEN ""Attack1Stars"" IS NOT NULL THEN 1 ELSE 0 END AS first_attack_used,
-                        CASE WHEN ""Attack2Stars"" IS NOT NULL THEN 1 ELSE 0 END AS second_attack_used,
-                        COALESCE(""Attack1Stars"", 0) + COALESCE(""Attack2Stars"", 0) AS total_stars
-                    FROM ended_war_performances
+                         CASE WHEN ""Attack2Stars"" IS NOT NULL THEN 1 ELSE 0 END)::smallint AS ""AttacksUsed"",
+                        CASE WHEN ""Attack1Stars"" IS NOT NULL THEN 1 ELSE 0 END AS ""FirstAttackUsed"",
+                        CASE WHEN ""Attack2Stars"" IS NOT NULL THEN 1 ELSE 0 END AS ""SecondAttackUsed"",
+                        COALESCE(""Attack1Stars"", 0) + COALESCE(""Attack2Stars"", 0) AS ""TotalStars""
+                    FROM ""EndedWarPerformances""
                 ),
                 
-                war_metrics AS (
+                ""WarMetrics"" AS (
                     SELECT 
                         ""PlayerTag"",
-                        AVG(""MapPosition"")::real AS avg_map_position,
-                        AVG(""TownHallLevel"")::real AS avg_th,
-                        (SUM(attacks_used)::real / NULLIF(COUNT(*) * 2, 0)) * 100 AS attack_participation_rate,
-                        AVG(total_stars)::real AS avg_stars_per_war,
-                        ((SUM(first_attack_used)::real / NULLIF(COUNT(*), 0)) * 100)::real AS first_attack_participation_rate,
-                        ((SUM(second_attack_used)::real / NULLIF(COUNT(*), 0)) * 100)::real AS second_attack_participation_rate
-                    FROM player_war_stats
+                        AVG(""MapPosition"")::real AS ""AvgMapPosition"",
+                        AVG(""TownHallLevel"")::real AS ""AvgTh"",
+                        (SUM(""AttacksUsed"")::real / NULLIF(COUNT(*) * 2, 0)) * 100 AS ""AttackParticipationRate"",
+                        AVG(""TotalStars"")::real AS ""AvgStarsPerWar"",
+                        ((SUM(""FirstAttackUsed"")::real / NULLIF(COUNT(*), 0)) * 100)::real AS ""FirstAttackParticipationRate"",
+                        ((SUM(""SecondAttackUsed"")::real / NULLIF(COUNT(*), 0)) * 100)::real AS ""SecondAttackParticipationRate""
+                    FROM ""PlayerWarStats""
                     GROUP BY ""PlayerTag""
                 ),
                 
-                recent_wars_array AS (
+                ""RecentWarsArray"" AS (
                     SELECT 
                         ""PlayerTag"",
-                        ARRAY_AGG(attacks_used ORDER BY war_rank ASC) FILTER (WHERE war_rank <= 5) AS recent_wars_attacks
+                        ARRAY_AGG(""AttacksUsed"" ORDER BY ""WarRank"" ASC) FILTER (WHERE ""WarRank"" <= 5) AS ""RecentWarsAttacks""
                     FROM (
                         SELECT 
                             ""PlayerTag"", 
-                            attacks_used,
-                            ROW_NUMBER() OVER (PARTITION BY ""PlayerTag"" ORDER BY ""StartTime"" DESC) as war_rank
-                        FROM player_war_stats
-                    ) ranked_wars
+                            ""AttacksUsed"",
+                            ROW_NUMBER() OVER (PARTITION BY ""PlayerTag"" ORDER BY ""StartTime"" DESC) as ""WarRank""
+                        FROM ""PlayerWarStats""
+                    ) ""RankedWars""
                     GROUP BY ""PlayerTag""
                 )
 
                 SELECT 
-                    cm.""Tag"" AS tag,
-                    cm.""Name"" AS name,
-                    COALESCE(wm.avg_map_position, 0) AS average_map_position,
-                    COALESCE(am.avg_opponent_map_position, 0) AS average_opponent_map_position,
-                    COALESCE(wm.avg_th, cm.""TownHallLevel"") AS average_town_hall_level,
-                    COALESCE(am.avg_opponent_th, 0) AS average_opponent_town_hall_level,
-                    COALESCE(wm.attack_participation_rate, 0) AS attack_participation_rate,
-                    COALESCE(am.avg_destruction, 0) AS average_destruction_percentage,
-                    COALESCE(wm.avg_stars_per_war, 0) AS average_stars_per_war,
-                    COALESCE(wm.first_attack_participation_rate, 0)::real AS first_attack_participation_rate,
-                    COALESCE(wm.second_attack_participation_rate, 0)::real AS second_attack_participation_rate,
-                    COALESCE(am.mirror_rate, 0)::real AS mirror_attacks_rate,
-                    COALESCE(am.same_th_3star_rate, 0)::real AS three_star_rate_against_same_th,
-                    COALESCE(am.avg_th_mismatch, 0) AS average_th_mismatches,
-                    COALESCE(rwa.recent_wars_attacks, ARRAY[]::smallint[]) AS recent_wars_attacks
-                FROM public.clan_members cm
-                LEFT JOIN war_metrics wm ON wm.""PlayerTag"" = cm.""Tag""
-                LEFT JOIN attack_metrics am ON am.""PlayerTag"" = cm.""Tag""
-                LEFT JOIN recent_wars_array rwa ON rwa.""PlayerTag"" = cm.""Tag""
-                WHERE cm.""IsNowInClan"" = true;
+                    Cm.""Tag"" AS ""Tag"",
+                    Cm.""Name"" AS ""Name"",
+                    COALESCE(Wm.""AvgMapPosition"", 0) AS ""AverageMapPosition"",
+                    COALESCE(Am.""AvgOpponentMapPosition"", 0) AS ""AverageOpponentMapPosition"",
+                    COALESCE(Wm.""AvgTh"", Cm.""TownHallLevel"") AS ""AverageTownHallLevel"",
+                    COALESCE(Am.""AvgOpponentTh"", 0) AS ""AverageOpponentTownHallLevel"",
+                    COALESCE(Wm.""AttackParticipationRate"", 0) AS ""AttackParticipationRate"",
+                    COALESCE(Am.""AvgDestruction"", 0) AS ""AverageDestructionPercentage"",
+                    COALESCE(Wm.""AvgStarsPerWar"", 0) AS ""AverageStarsPerWar"",
+                    COALESCE(Wm.""FirstAttackParticipationRate"", 0)::real AS ""FirstAttackParticipationRate"",
+                    COALESCE(Wm.""SecondAttackParticipationRate"", 0)::real AS ""SecondAttackParticipationRate"",
+                    COALESCE(Am.""MirrorRate"", 0)::real AS ""MirrorAttacksRate"",
+                    COALESCE(Am.""SameTh3StarRate"", 0)::real AS ""ThreeStarRateAgainstSameTh"",
+                    COALESCE(Am.""AvgThMismatch"", 0) AS ""AverageThMismatches"",
+                    COALESCE(Rwa.""RecentWarsAttacks"", ARRAY[]::smallint[]) AS ""RecentWarsAttacks""
+                FROM public.clan_members Cm
+                LEFT JOIN ""WarMetrics"" Wm ON Wm.""PlayerTag"" = Cm.""Tag""
+                LEFT JOIN ""AttackMetrics"" Am ON Am.""PlayerTag"" = Cm.""Tag""
+                LEFT JOIN ""RecentWarsArray"" Rwa ON Rwa.""PlayerTag"" = Cm.""Tag""
+                WHERE Cm.""IsNowInClan"" = true;
 
                 CREATE UNIQUE INDEX idx_mv_clan_war_player_summaries_tag 
                 ON mv_clan_war_player_summaries(tag);
             ");
-
         }
 
         /// <inheritdoc />
