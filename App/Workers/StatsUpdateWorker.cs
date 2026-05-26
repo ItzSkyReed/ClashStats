@@ -11,42 +11,53 @@ using Microsoft.Extensions.Logging;
 public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServiceProvider serviceProvider) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken ct)
+{
+    logger.LogInformation("Worker loaded. Initializing cache and data seed...");
+
+    try
     {
-        logger.LogInformation("Worker loaded.");
+        using var scope = serviceProvider.CreateScope();
+        var initializer = scope.ServiceProvider.GetRequiredService<IClanDataSyncService>();
+        logger.LogInformation("Seeding initial clan members...");
+        await initializer.UpdateClanMembers(ct);
 
-        var clanMembersTask = RunTaskWithTimerAsync(
-            TimeSpan.FromMinutes(5),
-            collector => collector.UpdateClanMembers(ct),
-            "ClanMembers", ct);
-
-        var clanWarTask = RunTaskWithTimerAsync(
-            TimeSpan.FromMinutes(1),
-            async collector =>
-            {
-                var hasChanges = await collector.UpdateClanWar(ct);
-
-                if (hasChanges)
-                {
-                    // Refreshing Materialized views
-                    await collector.RefreshMaterializedViews(ct);
-
-                }
-            },
-            "ClanWarAndViews", ct);
-
-        var seasonStatsTask = RunTaskWithTimerAsync(
-            TimeSpan.FromMinutes(10),
-            collector => collector.UpdateSeasonStats(ct),
-            "SeasonStats", ct);
-
-        var cleanupStuckWarsTask = RunTaskWithTimerAsync(
-            TimeSpan.FromMinutes(10),
-            collector => collector.CleanupStuckWars(ct),
-            "StuckWars", ct);
-
-
-        await Task.WhenAll(clanMembersTask, seasonStatsTask, clanWarTask, cleanupStuckWarsTask);
+        logger.LogInformation("Seeding initial clan war data...");
+        await initializer.UpdateClanWar(ct);
     }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to run initial data seed. Moving to timers...");
+    }
+
+    var clanMembersTask = RunTaskWithTimerAsync(
+        TimeSpan.FromMinutes(5),
+        collector => collector.UpdateClanMembers(ct),
+        "ClanMembers", ct);
+
+    var clanWarTask = RunTaskWithTimerAsync(
+        TimeSpan.FromMinutes(1),
+        async collector =>
+        {
+            var hasChanges = await collector.UpdateClanWar(ct);
+            if (hasChanges)
+            {
+                await collector.RefreshMaterializedViews(ct);
+            }
+        },
+        "ClanWarAndViews", ct);
+
+    var seasonStatsTask = RunTaskWithTimerAsync(
+        TimeSpan.FromMinutes(10),
+        collector => collector.UpdateSeasonStats(ct),
+        "SeasonStats", ct);
+
+    var cleanupStuckWarsTask = RunTaskWithTimerAsync(
+        TimeSpan.FromMinutes(10),
+        collector => collector.CleanupStuckWars(ct),
+        "StuckWars", ct);
+
+    await Task.WhenAll(clanMembersTask, seasonStatsTask, clanWarTask, cleanupStuckWarsTask);
+}
 
     private async Task RunTaskWithTimerAsync(TimeSpan period, Func<IClanDataSyncService, Task> action, string taskName, CancellationToken ct)
     {
