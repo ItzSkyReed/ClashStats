@@ -12,26 +12,26 @@ public class ClanWarSummaryConfiguration : IEntityTypeConfiguration<ClanWarSumma
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Id).HasColumnName("Id");
-        builder.Property(x => x.StartTime).HasColumnName("StartTime");
-        builder.Property(x => x.EndTime).HasColumnName("EndTime");
-        builder.Property(x => x.TeamSize).HasColumnName("TeamSize");
-        builder.Property(x => x.OpponentClanName).HasColumnName("OpponentClanName");
-        builder.Property(x => x.OpponentClanLevel).HasColumnName("OpponentClanLevel");
-        builder.Property(x => x.OpponentAttacks).HasColumnName("OpponentAttacks");
-        builder.Property(x => x.OurAttacks).HasColumnName("OurAttacks");
-        builder.Property(x => x.OurStars).HasColumnName("OurStars");
-        builder.Property(x => x.OpponentStars).HasColumnName("OpponentStars");
-        builder.Property(x => x.OurDestructionPercentage).HasColumnName("OurDestructionPercentage");
-        builder.Property(x => x.OpponentDestructionPercentage).HasColumnName("OpponentDestructionPercentage");
-        builder.Property(x => x.ExpEarned).HasColumnName("ExpEarned");
+        builder.Property(x => x.Id);
+        builder.Property(x => x.StartTime);
+        builder.Property(x => x.EndTime);
+        builder.Property(x => x.TeamSize);
+        builder.Property(x => x.OpponentClanName);
+        builder.Property(x => x.OpponentClanLevel);
+        builder.Property(x => x.OpponentAttacks);
+        builder.Property(x => x.OurAttacks);
+        builder.Property(x => x.OurStars);
+        builder.Property(x => x.OpponentStars);
+        builder.Property(x => x.OurDestructionPercentage);
+        builder.Property(x => x.OpponentDestructionPercentage);
+        builder.Property(x => x.ExpEarned);
 
-        builder.Property(x => x.AverageOurTownHall).HasColumnName("AverageOurTownHall");
-        builder.Property(x => x.AverageOpponentTownHall).HasColumnName("AverageOpponentTownHall");
-        builder.Property(x => x.TownHallAdvantage).HasColumnName("TownHallAdvantage");
-        builder.Property(x => x.ParticipationRate).HasColumnName("ParticipationRate");
-        builder.Property(x => x.OurThreeStarsCount).HasColumnName("OurThreeStarsCount");
-        builder.Property(x => x.StarsPerAttack).HasColumnName("StarsPerAttack");
+        builder.Property(x => x.AverageOurTownHall);
+        builder.Property(x => x.AverageOpponentTownHall);
+        builder.Property(x => x.TownHallAdvantage);
+        builder.Property(x => x.ParticipationRate);
+        builder.Property(x => x.OurThreeStarsCount);
+        builder.Property(x => x.StarsPerAttack);
 
         builder.Ignore(x => x.Result);
     }
