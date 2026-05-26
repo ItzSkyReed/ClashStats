@@ -1,17 +1,18 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.RateLimiting;
+using App.Endpoints;
 using App.Workers;
 using Application.Interfaces;
 using Application.Services;
-using Ardalis.SmartEnum.SystemTextJson;
-using Domain.Constants;
 using Infrastructure.Api;
 using Infrastructure.Api.Converters;
 using Infrastructure.Middlewares;
 using Infrastructure.Persistence;
+using Infrastructure.Swagger;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http.Resilience;
+using Microsoft.OpenApi;
 using Polly;
 
 namespace App;
@@ -20,21 +21,35 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var builder = Host.CreateApplicationBuilder(args);
+        var builder = WebApplication.CreateBuilder(args);
 
         builder.Configuration.AddEnvironmentVariables();
 
         ConfigureServices(builder);
 
         using var host = builder.Build();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Russian Winners Stats API", Version = "v1" });
 
-        await ApplyMigrations(host.Services);
+        });
 
+        var app = builder.Build();
+
+
+        app.UseSwagger();
+        app.UseSwaggerUI();
+
+        await ApplyMigrations(app.Services);
 
         await host.RunAsync();
+        app.MapEndpoints();
+
+        await app.RunAsync();
     }
 
-    private static void ConfigureServices(HostApplicationBuilder builder)
+    private static void ConfigureServices(WebApplicationBuilder builder)
     {
         Action<JsonSerializerOptions> configureJson = options =>
         {
@@ -50,6 +65,7 @@ public class Program
         {
             configureJson(options.SerializerOptions);
         });
+
         builder.Services.AddMemoryCache();
         builder.Services.AddTransient<CachingHandler>();
 
@@ -88,7 +104,6 @@ public class Program
             provider.GetRequiredService<AppDbContext>());
 
         builder.Services.AddScoped<IClashApiClient, ClashApiClient>();
-
         builder.Services.AddScoped<IClanDataSyncService, ClanDataSyncService>();
 
         builder.Services.AddHostedService<StatsUpdateWorker>();
@@ -108,7 +123,6 @@ public class Program
         {
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             logger.LogError(ex, "Error while applying migrations.");
-
             throw;
         }
     }
