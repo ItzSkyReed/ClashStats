@@ -22,7 +22,7 @@ namespace Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Application.AnalyticsDTOs.ClanWarPlayerSummaryDto", b =>
+            modelBuilder.Entity("Application.AnalyticsDTOs.ClanWarPlayerSummary", b =>
                 {
                     b.Property<string>("Tag")
                         .HasColumnType("text");
@@ -78,7 +78,7 @@ namespace Infrastructure.Migrations
                     b.ToView("mv_clan_war_player_summaries", (string)null);
                 });
 
-            modelBuilder.Entity("Application.AnalyticsDTOs.ClanWarSummaryDto", b =>
+            modelBuilder.Entity("Application.AnalyticsDTOs.ClanWarSummary", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("integer")
