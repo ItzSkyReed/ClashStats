@@ -1,0 +1,21 @@
+﻿services:
+  app:
+    env_file:
+      - .env
+    environment:
+      # Change Host for your shared postgres instance
+      ConnectionStrings__DefaultConnection: "Host=shared_postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+    image: app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    build:
+      context: .
+      dockerfile: App/Dockerfile
+    # Change network for your shared postgres instance
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    external: true
