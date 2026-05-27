@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Clans.ClanWars;
+﻿using System.Globalization;
+using Application.DTOs.Clans.ClanWars;
 using Application.DTOs.Leagues;
 using Application.DTOs.Players;
 using Application.Interfaces;
@@ -17,6 +18,8 @@ public class ClanDataSyncService(
     [FromKeyedServices("ClanTag")] string clanTag,
     ILogger<ClanDataSyncService> logger) : IClanDataSyncService
 {
+    private static readonly ClanWarState[] ActiveWarStates = [ClanWarState.InWar, ClanWarState.WarEnded];
+
     public async Task UpdateClanMembers(CancellationToken ct)
     {
         var clanMembers = await GetClanMembers(clanTag);
@@ -76,7 +79,7 @@ public class ClanDataSyncService(
         var parsedDateTime = DateTimeOffset.ParseExact(
             leagueData.Items[^1].Id,
             "'v2-'yyyy-MM-dd'T'HH:mm:ss'Z'",
-            System.Globalization.CultureInfo.InvariantCulture
+            CultureInfo.InvariantCulture
         );
 
         var latestSeason = DateOnly.FromDateTime(parsedDateTime.UtcDateTime);
@@ -85,13 +88,18 @@ public class ClanDataSyncService(
         if (clanMembers is null)
             return;
 
-        var memberTags = clanMembers.Items.Select(m => m.Tag).ToList();
+        var apiMemberTags = clanMembers.Items.Select(m => m.Tag).ToList();
+
+        var allowedDbMemberTags = await dbContext.ClanMembers
+            .Where(m => apiMemberTags.Contains(m.Tag))
+            .Select(m => m.Tag)
+            .ToHashSetAsync(ct);
 
         var existingStats = await dbContext.SeasonStats
-            .Where(s => s.SeasonDate == latestSeason && memberTags.Contains(s.PlayerTag))
+            .Where(s => s.SeasonDate == latestSeason && allowedDbMemberTags.Contains(s.PlayerTag))
             .ToDictionaryAsync(s => s.PlayerTag, ct);
 
-        foreach (var member in clanMembers.Items)
+        foreach (var member in clanMembers.Items.Where(member => allowedDbMemberTags.Contains(member.Tag)))
         {
             if (existingStats.TryGetValue(member.Tag, out var dbStat))
             {
@@ -116,8 +124,6 @@ public class ClanDataSyncService(
         await dbContext.SaveChangesAsync(ct);
     }
 
-    private static readonly ClanWarState[] ActiveWarStates = [ClanWarState.InWar, ClanWarState.WarEnded];
-
     public async Task<bool> UpdateClanWar(CancellationToken ct)
     {
         var clanWarData = await GetClanWar(clanTag);
@@ -131,8 +137,7 @@ public class ClanDataSyncService(
         var currentWar = await dbContext.ClanWars
             .Include(cw => cw.PlayersPerformances)
             .SingleOrDefaultAsync(
-                s => s.OpponentClanTag == clanWarData.Opponent!.Tag &&
-                     s.StartTime == clanWarData.StartTime, ct);
+                s => s.OpponentClanTag == clanWarData.Opponent!.Tag && s.StartTime == clanWarData.StartTime, ct);
 
         if (currentWar is null)
         {
