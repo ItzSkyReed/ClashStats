@@ -28,18 +28,33 @@ public class Program
         ConfigureServices(builder);
 
         builder.Services.AddEndpointsApiExplorer();
+
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Russian Winners Stats API", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "Russian Winners Stats API",
+                Version = "v1"
+            });
 
+            c.SupportNonNullableReferenceTypes();
             c.SchemaFilter<SmartEnumSchemaFilter>();
         });
 
         var app = builder.Build();
 
-
         app.UseSwagger();
-        app.UseSwaggerUI();
+
+        // Swagger UI
+        app.UseSwaggerUI(c => { c.RoutePrefix = "swagger"; });
+
+        // ReDoc
+        app.UseReDoc(c =>
+        {
+            c.RoutePrefix = "docs";
+            c.SpecUrl("/swagger/v1/swagger.json");
+            c.DocumentTitle = "Russian Winners Stats API Docs";
+        });
 
         await ApplyMigrations(app.Services);
 
@@ -54,53 +69,53 @@ public class Program
         {
             options.PropertyNameCaseInsensitive = true;
             options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            options.IncludeFields = true;
             options.Converters.Add(new ClashDateTimeConverter());
         };
 
         builder.Services.Configure(configureJson);
 
-        builder.Services.ConfigureHttpJsonOptions(options =>
-        {
-            configureJson(options.SerializerOptions);
-        });
+        builder.Services.ConfigureHttpJsonOptions(options => { configureJson(options.SerializerOptions); });
 
         builder.Services.AddMemoryCache();
+
         builder.Services.AddTransient<CachingHandler>();
 
         builder.Services.AddHttpClient<ClashApiRequestExecutor>(client =>
-        {
-            client.BaseAddress = new Uri(builder.Configuration["CLASH_OF_CLANS:API_URL"]!);
-            client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", builder.Configuration["CLASH_OF_CLANS:API_USER_TOKEN"]!);
-        })
-        .AddHttpMessageHandler<CachingHandler>()
-        .AddResilienceHandler("ClashApiResiliencePolicy", httpBuilder =>
-        {
-            httpBuilder.AddRateLimiter(new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 7,
-                Window = TimeSpan.FromSeconds(1),
-                QueueLimit = 10000,
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
-            }));
+                client.BaseAddress = new Uri(builder.Configuration["CLASH_OF_CLANS:API_URL"]!);
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", builder.Configuration["CLASH_OF_CLANS:API_USER_TOKEN"]!);
+            })
+            .AddHttpMessageHandler<CachingHandler>()
+            .AddResilienceHandler("ClashApiResiliencePolicy", httpBuilder =>
+            {
+                httpBuilder.AddRateLimiter(new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 7,
+                    Window = TimeSpan.FromSeconds(1),
+                    QueueLimit = 10000,
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                }));
 
-            httpBuilder.AddRetry(new HttpRetryStrategyOptions
-            {
-                MaxRetryAttempts = 3,
-                Delay = TimeSpan.FromSeconds(2),
-                BackoffType = DelayBackoffType.Exponential,
-                UseJitter = true
+                httpBuilder.AddRetry(new HttpRetryStrategyOptions
+                {
+                    MaxRetryAttempts = 3,
+                    Delay = TimeSpan.FromSeconds(2),
+                    BackoffType = DelayBackoffType.Exponential,
+                    UseJitter = true
+                });
             });
-        });
 
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+            options.UseNpgsql(
+                builder.Configuration.GetConnectionString("DefaultConnection")
+            );
         });
 
         builder.Services.AddScoped<IAppDbContext>(provider =>
-            provider.GetRequiredService<AppDbContext>());
+            provider.GetRequiredService<AppDbContext>()
+        );
 
         builder.Services.AddScoped<IClashApiClient, ClashApiClient>();
         builder.Services.AddScoped<IClanDataSyncService, ClanDataSyncService>();
@@ -113,7 +128,9 @@ public class Program
     private static async Task ApplyMigrations(IServiceProvider services)
     {
         using var scope = services.CreateScope();
+
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
         try
         {
             await dbContext.Database.MigrateAsync();
@@ -121,7 +138,9 @@ public class Program
         catch (Exception ex)
         {
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
             logger.LogError(ex, "Error while applying migrations.");
+
             throw;
         }
     }
