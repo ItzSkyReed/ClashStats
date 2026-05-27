@@ -260,7 +260,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OpponentClanTag", "OpponentClanName", "StartTime");
+                    b.HasIndex("OpponentClanTag", "StartTime");
 
                     b.ToTable("clan_wars", (string)null);
                 });

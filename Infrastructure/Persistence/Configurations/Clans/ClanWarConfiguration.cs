@@ -34,6 +34,6 @@ public class ClanWarConfiguration : IEntityTypeConfiguration<ClanWar>
         builder.Property(x => x.OpponentDestructionPercentage).IsRequired();
         builder.Property(x => x.ExpEarned);
 
-        builder.HasIndex(x => new { x.OpponentClanTag, x.OpponentClanName, x.StartTime });
+        builder.HasIndex(x => new { x.OpponentClanTag, x.StartTime });
     }
 }
