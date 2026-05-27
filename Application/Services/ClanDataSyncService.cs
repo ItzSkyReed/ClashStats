@@ -131,7 +131,7 @@ public class ClanDataSyncService(
         var currentWar = await dbContext.ClanWars
             .Include(cw => cw.PlayersPerformances)
             .SingleOrDefaultAsync(
-                s => s.OpponentClanTag == clanWarData.Opponent!.Tag && s.OpponentClanName == clanWarData.Opponent!.Name &&
+                s => s.OpponentClanTag == clanWarData.Opponent!.Tag &&
                      s.StartTime == clanWarData.StartTime, ct);
 
         if (currentWar is null)
