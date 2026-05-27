@@ -20,6 +20,7 @@ public class ClanWarConfiguration : IEntityTypeConfiguration<ClanWar>
             role => role!.Value,
             value => ClanWarState.FromValue(value)
         ).UseCollation("C").HasMaxLength(64).IsRequired();
+
         builder.Property(x => x.EndTime).IsRequired().HasColumnType("timestamp without time zone");
         builder.Property(x => x.TeamSize).IsRequired();
         builder.Property(x => x.OpponentClanTag).HasMaxLength(10).UseCollation("C").IsRequired();
@@ -33,7 +34,6 @@ public class ClanWarConfiguration : IEntityTypeConfiguration<ClanWar>
         builder.Property(x => x.OpponentDestructionPercentage).IsRequired();
         builder.Property(x => x.ExpEarned);
 
-        builder.HasIndex(x => x.OpponentClanTag);
-        builder.HasIndex(x => new { x.StartTime, x.EndTime });
+        builder.HasIndex(x => new { x.OpponentClanTag, x.OpponentClanName, x.StartTime });
     }
 }
