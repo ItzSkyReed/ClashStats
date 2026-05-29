@@ -6,19 +6,19 @@ namespace Infrastructure.Api;
 
 public partial class ClashApiClient
 {
-    public async Task<IApiResult<PlayerDto>> GetPlayerAsync(string playerTag)
+    public async Task<IApiResult<PlayerDto>> GetPlayerAsync(string playerTag, CancellationToken ct = default)
     {
         var encodedTag = Uri.EscapeDataString(playerTag);
-        return await _executor.GetAsync<PlayerDto>($"players/{encodedTag}");
+        return await _executor.GetAsync<PlayerDto>($"players/{encodedTag}", ct);
     }
 
-    public async Task<IApiResult<VerifyTokenResponseDto>> PostVerifyTokenAsync(string playerTag, string token)
+    public async Task<IApiResult<VerifyTokenResponseDto>> PostVerifyTokenAsync(string playerTag, string token, CancellationToken ct = default)
     {
         var encodedTag = Uri.EscapeDataString(playerTag);
         var bodyParams = new Dictionary<string, object>
         {
             { "token", token }
         };
-        return await _executor.PostAsync<VerifyTokenResponseDto>($"players/{encodedTag}/verify_token", bodyParams);
+        return await _executor.PostAsync<VerifyTokenResponseDto>($"players/{encodedTag}/verify_token", bodyParams, ct);
     }
 }

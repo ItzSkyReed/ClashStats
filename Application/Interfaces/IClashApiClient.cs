@@ -13,75 +13,84 @@ namespace Application.Interfaces;
 
 public interface IClashApiClient
 {
-    public Task<IApiResult<ClanDto>> GetClanAsync(string clanTag);
+    public Task<IApiResult<ClanDto>> GetClanAsync(string clanTag, CancellationToken cancellationToken = default);
 
     public Task<IApiResult<ClanMemberListDto>> GetClanMembersAsync(
-        string clanTag, uint? limit = null, string? after = null, string? before = null);
+        string clanTag, uint? limit = null, string? after = null, string? before = null, CancellationToken cancellationToken = default);
 
     public Task<IApiResult<ClanCapitalRaidSeasonsDto>> GetClanCapitalRaidSeasonsAsync(
-        string clanTag, uint? limit = null, string? after = null, string? before = null);
+        string clanTag, uint? limit = null, string? after = null, string? before = null, CancellationToken cancellationToken = default);
 
     public Task<IApiResult<ClanWarLogDto>> GetClanWarLogAsync(
-        string clanTag, uint? limit = null, string? after = null, string? before = null);
+        string clanTag, uint? limit = null, string? after = null, string? before = null, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<ClanWarDto>> GetCurrentClanWarAsync(string clanTag);
+    public Task<IApiResult<ClanWarDto>> GetCurrentClanWarAsync(string clanTag, CancellationToken cancellationToken = default);
 
     public Task<IApiResult<ClanListDto>> GetClansAsync(
         string? name = null, WarFrequency? warFrequency = null, uint? limit = null, uint? locationId = null,
         string? after = null, string? before = null, uint? maxMembers = null, uint? minMembers = null,
-        uint? minClanPoints = null, uint? minClanLevel = null, List<uint>? labelIds = null);
+        uint? minClanPoints = null, uint? minClanLevel = null, List<uint>? labelIds = null, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<ClanWarLeagueGroupDto>> GetCurrentClanWarLeagueGroupAsync(string clanTag);
+    public Task<IApiResult<ClanWarLeagueGroupDto>> GetCurrentClanWarLeagueGroupAsync(string clanTag, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<ClanWarLeagueGroupDto>> GetClanWarLeagueWarAsync(string warTag);
+    public Task<IApiResult<ClanWarLeagueGroupDto>> GetClanWarLeagueWarAsync(string warTag, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<LabelListDto>> GetPlayerLabelsAsync(uint? limit = null, string? after = null, string? before = null);
+    public Task<IApiResult<LabelListDto>> GetPlayerLabelsAsync(uint? limit = null, string? after = null, string? before = null,
+        CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<LabelListDto>> GetClanLabelsAsync(uint? limit = null, string? after = null, string? before = null);
+    public Task<IApiResult<LabelListDto>> GetClanLabelsAsync(uint? limit = null, string? after = null, string? before = null,
+        CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<LeagueListDto>> GetLeaguesAsync(uint? limit = null, string? after = null, string? before = null);
+    public Task<IApiResult<LeagueListDto>> GetLeaguesAsync(uint? limit = null, string? after = null, string? before = null,
+        CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<LeagueDto>> GetLeagueAsync(uint leagueId);
+    public Task<IApiResult<LeagueDto>> GetLeagueAsync(uint leagueId, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<BuilderBaseLeagueListDto>> GetBuilderBaseLeaguesAsync(uint? limit = null, string? after = null, string? before = null);
+    public Task<IApiResult<BuilderBaseLeagueListDto>> GetBuilderBaseLeaguesAsync(uint? limit = null, string? after = null, string? before = null,
+        CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<BuilderBaseLeagueDto>> GetBuilderBaseLeagueAsync(uint leagueId);
+    public Task<IApiResult<BuilderBaseLeagueDto>> GetBuilderBaseLeagueAsync(uint leagueId, CancellationToken cancellationToken = default);
 
+    public Task<IApiResult<CapitalLeagueListDto>> GetCapitalLeaguesAsync(uint? limit = null, string? after = null, string? before = null,
+        CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<CapitalLeagueListDto>> GetCapitalLeaguesAsync(uint? limit = null, string? after = null, string? before = null);
+    public Task<IApiResult<CapitalLeagueDto>> GetCapitalLeagueAsync(uint leagueId, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<CapitalLeagueDto>> GetCapitalLeagueAsync(uint leagueId);
+    public Task<IApiResult<LeagueTierListDto>> GetLeagueTiersAsync(uint? limit = null, string? after = null, string? before = null,
+        CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<LeagueTierListDto>> GetLeagueTiersAsync(uint? limit = null, string? after = null, string? before = null);
+    public Task<IApiResult<LeagueListDto>> GetLeagueTierAsync(uint leagueTierId, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<LeagueListDto>> GetLeagueTierAsync(uint leagueTierId);
+    public Task<IApiResult<WarLeagueListDto>> GetWarLeaguesAsync(uint? limit = null, string? after = null, string? before = null,
+        CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<WarLeagueListDto>> GetWarLeaguesAsync(uint? limit = null, string? after = null, string? before = null);
+    public Task<IApiResult<WarLeagueDto>> GetWarLeagueAsync(uint leagueId, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<WarLeagueDto>> GetWarLeagueAsync(uint leagueId);
-
-    public Task<IApiResult<LeagueSeasonListDto>> GetLeagueSeasonsAsync(uint leagueId = 29000022);
+    public Task<IApiResult<LeagueSeasonListDto>> GetLeagueSeasonsAsync(uint leagueId = 29000022, CancellationToken cancellationToken = default);
 
     public Task<IApiResult<WarLeagueListDto>> GetLeagueSeasonRankingsAsync(
-        string seasonId, uint leagueId = 29000022, uint? limit = null, string? after = null, string? before = null);
+        string seasonId, uint leagueId = 29000022, uint? limit = null, string? after = null, string? before = null,
+        CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<LocationListDto>> GetLocationAsync(int locationId);
+    public Task<IApiResult<LocationListDto>> GetLocationAsync(int locationId, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<LocationListDto>> GetLocationsAsync(uint? limit = null, string? after = null, string? before = null);
+    public Task<IApiResult<LocationListDto>> GetLocationsAsync(uint? limit = null, string? after = null, string? before = null,
+        CancellationToken cancellationToken = default);
 
     public Task<IApiResult<ClanCapitalRankingListDto>> GetCapitalRankingsByLocationAsync(
-        uint locationId, uint? limit = null, string? after = null, string? before = null);
+        uint locationId, uint? limit = null, string? after = null, string? before = null, CancellationToken cancellationToken = default);
 
     public Task<IApiResult<ClanBuilderBaseRankingListDto>> GetClanBuilderBaseRankingsByLocationAsync(
-        uint locationId, uint? limit = null, string? after = null, string? before = null);
+        uint locationId, uint? limit = null, string? after = null, string? before = null, CancellationToken cancellationToken = default);
 
     public Task<IApiResult<PlayerBuilderBaseRankingListDto>> GetPlayerBuilderBaseRankingsByLocationAsync(
-        uint locationId, uint? limit = null, string? after = null, string? before = null);
+        uint locationId, uint? limit = null, string? after = null, string? before = null, CancellationToken cancellationToken = default);
 
     public Task<IApiResult<PlayerBuilderBaseRankingListDto>> GetPlayerRankingsByLocationAsync(
-        uint locationId, uint? limit = null, string? after = null, string? before = null);
+        uint locationId, uint? limit = null, string? after = null, string? before = null, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<PlayerDto>> GetPlayerAsync(string playerTag);
+    public Task<IApiResult<PlayerDto>> GetPlayerAsync(string playerTag, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<VerifyTokenResponseDto>> PostVerifyTokenAsync(string playerTag, string token);
+    public Task<IApiResult<VerifyTokenResponseDto>> PostVerifyTokenAsync(string playerTag, string token,
+        CancellationToken cancellationToken = default);
 }

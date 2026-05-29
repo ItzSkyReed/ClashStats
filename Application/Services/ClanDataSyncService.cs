@@ -22,7 +22,7 @@ public class ClanDataSyncService(
 
     public async Task UpdateClanMembers(CancellationToken ct)
     {
-        var clanMembers = await GetClanMembers(clanTag);
+        var clanMembers = await GetClanMembers(clanTag, ct);
 
         if (clanMembers is null)
             return;
@@ -38,8 +38,8 @@ public class ClanDataSyncService(
 
         var tasks = currentTags.Select(async tag =>
         {
-            var result = await apiClient.GetPlayerAsync(tag);
-            return (Tag: tag, Result: result);
+            var result = await apiClient.GetPlayerAsync(tag, ct);
+            playerResults.Add((tag, result));
         });
 
         var playerResults = await Task.WhenAll(tasks);
@@ -71,7 +71,7 @@ public class ClanDataSyncService(
 
     public async Task UpdateSeasonStats(CancellationToken ct)
     {
-        var leagueData = await GetLeagueSeasons();
+        var leagueData = await GetLeagueSeasons(ct);
 
         if (leagueData is null)
             return;
@@ -84,7 +84,7 @@ public class ClanDataSyncService(
 
         var latestSeason = DateOnly.FromDateTime(parsedDateTime.UtcDateTime);
 
-        var clanMembers = await GetClanMembers(clanTag);
+        var clanMembers = await GetClanMembers(clanTag, ct);
         if (clanMembers is null)
             return;
 
@@ -126,7 +126,7 @@ public class ClanDataSyncService(
 
     public async Task<bool> UpdateClanWar(CancellationToken ct)
     {
-        var clanWarData = await GetClanWar(clanTag);
+        var clanWarData = await GetClanWar(clanTag, ct);
 
         if (clanWarData is null)
             return false;
@@ -219,7 +219,7 @@ public class ClanDataSyncService(
         if (stuckWars.Count == 0)
             return;
 
-        var warLog = await GetClanWarLog();
+        var warLog = await GetClanWarLog(ct);
 
         if (warLog is null)
         {
@@ -306,9 +306,9 @@ public class ClanDataSyncService(
         entity.OurStars = (short)apiData.Clan.Stars;
     }
 
-    private async Task<ClanMemberListDto?> GetClanMembers(string tag)
+    private async Task<ClanMemberListDto?> GetClanMembers(string tag, CancellationToken ct)
     {
-        var clanResult = await apiClient.GetClanMembersAsync(tag);
+        var clanResult = await apiClient.GetClanMembersAsync(tag, cancellationToken: ct);
 
         if (clanResult.Error is not { } clanError)
             return clanResult.Data;
@@ -318,9 +318,9 @@ public class ClanDataSyncService(
         return null;
     }
 
-    private async Task<ClanWarDto?> GetClanWar(string tag)
+    private async Task<ClanWarDto?> GetClanWar(string tag, CancellationToken ct)
     {
-        var warResult = await apiClient.GetCurrentClanWarAsync(tag);
+        var warResult = await apiClient.GetCurrentClanWarAsync(tag, ct);
 
         if (warResult.Error is not { } clanError)
             return warResult.Data;
@@ -330,9 +330,9 @@ public class ClanDataSyncService(
         return null;
     }
 
-    private async Task<LeagueSeasonListDto?> GetLeagueSeasons()
+    private async Task<LeagueSeasonListDto?> GetLeagueSeasons(CancellationToken ct)
     {
-        var leagueResult = await apiClient.GetLeagueSeasonsAsync();
+        var leagueResult = await apiClient.GetLeagueSeasonsAsync(cancellationToken: ct);
 
         if (leagueResult.Error is not { } leagueResultError)
             return leagueResult.Data;
@@ -342,9 +342,9 @@ public class ClanDataSyncService(
         return null;
     }
 
-    private async Task<ClanWarLogDto?> GetClanWarLog()
+    private async Task<ClanWarLogDto?> GetClanWarLog(CancellationToken ct)
     {
-        var logResult = await apiClient.GetClanWarLogAsync(clanTag);
+        var logResult = await apiClient.GetClanWarLogAsync(clanTag, cancellationToken: ct);
 
         if (logResult.Error is not { } logResultError)
             return logResult.Data;

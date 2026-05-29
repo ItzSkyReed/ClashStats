@@ -10,14 +10,14 @@ namespace Infrastructure.Api;
 
 public partial class ClashApiClient
 {
-    public async Task<IApiResult<ClanDto>> GetClanAsync(string clanTag)
+    public async Task<IApiResult<ClanDto>> GetClanAsync(string clanTag, CancellationToken cancellationToken = default)
     {
         var encoded = Uri.EscapeDataString(clanTag);
-        return await _executor.GetAsync<ClanDto>($"clans/{encoded}");
+        return await _executor.GetAsync<ClanDto>($"clans/{encoded}", cancellationToken);
     }
 
     public async Task<IApiResult<ClanMemberListDto>> GetClanMembersAsync(
-        string clanTag, uint? limit = null, string? after = null, string? before = null)
+        string clanTag, uint? limit = null, string? after = null, string? before = null, CancellationToken cancellationToken = default)
     {
         ValidateExclusiveBeforeAfter(before, after);
 
@@ -31,11 +31,11 @@ public partial class ClashApiClient
 
         var endpoint = QueryHelpers.AddQueryString($"clans/{encodedTag}/members", queryParams);
 
-        return await _executor.GetAsync<ClanMemberListDto>(endpoint);
+        return await _executor.GetAsync<ClanMemberListDto>(endpoint, cancellationToken);
     }
 
     public async Task<IApiResult<ClanCapitalRaidSeasonsDto>> GetClanCapitalRaidSeasonsAsync(
-        string clanTag, uint? limit = null, string? after = null, string? before = null)
+        string clanTag, uint? limit = null, string? after = null, string? before = null, CancellationToken cancellationToken = default)
     {
         ValidateExclusiveBeforeAfter(before, after);
 
@@ -49,11 +49,11 @@ public partial class ClashApiClient
 
         var endpoint = QueryHelpers.AddQueryString($"clans/{encodedTag}/capitalraidseasons", queryParams);
 
-        return await _executor.GetAsync<ClanCapitalRaidSeasonsDto>(endpoint);
+        return await _executor.GetAsync<ClanCapitalRaidSeasonsDto>(endpoint, cancellationToken);
     }
 
     public async Task<IApiResult<ClanWarLogDto>> GetClanWarLogAsync(
-        string clanTag, uint? limit = null, string? after = null, string? before = null)
+        string clanTag, uint? limit = null, string? after = null, string? before = null, CancellationToken cancellationToken = default)
     {
         ValidateExclusiveBeforeAfter(before, after);
 
@@ -67,19 +67,19 @@ public partial class ClashApiClient
 
         var endpoint = QueryHelpers.AddQueryString($"clans/{encodedTag}/warlog", queryParams);
 
-        return await _executor.GetAsync<ClanWarLogDto>(endpoint);
+        return await _executor.GetAsync<ClanWarLogDto>(endpoint, cancellationToken);
     }
 
-    public async Task<IApiResult<ClanWarDto>> GetCurrentClanWarAsync(string clanTag)
+    public async Task<IApiResult<ClanWarDto>> GetCurrentClanWarAsync(string clanTag, CancellationToken cancellationToken = default)
     {
         var encoded = Uri.EscapeDataString(clanTag);
-        return await _executor.GetAsync<ClanWarDto>($"clans/{encoded}/currentwar");
+        return await _executor.GetAsync<ClanWarDto>($"clans/{encoded}/currentwar", cancellationToken);
     }
 
     public async Task<IApiResult<ClanListDto>> GetClansAsync(
         string? name = null, WarFrequency? warFrequency = null, uint? limit = null, uint? locationId = null,
         string? after = null, string? before = null, uint? maxMembers = null, uint? minMembers = null,
-        uint? minClanPoints = null, uint? minClanLevel = null, List<uint>? labelIds = null)
+        uint? minClanPoints = null, uint? minClanLevel = null, List<uint>? labelIds = null, CancellationToken cancellationToken = default)
     {
         if (name is not null && name.Length < 3)
             throw new ArgumentException("Name must be at least 3 characters long if present");
@@ -102,18 +102,19 @@ public partial class ClashApiClient
 
         var endpoint = QueryHelpers.AddQueryString("clans", queryParams);
 
-        return await _executor.GetAsync<ClanListDto>(endpoint);
+        return await _executor.GetAsync<ClanListDto>(endpoint, cancellationToken);
     }
 
-    public async Task<IApiResult<ClanWarLeagueGroupDto>> GetCurrentClanWarLeagueGroupAsync(string clanTag)
+    public async Task<IApiResult<ClanWarLeagueGroupDto>> GetCurrentClanWarLeagueGroupAsync(string clanTag,
+        CancellationToken cancellationToken = default)
     {
         var encodedTag = Uri.EscapeDataString(clanTag);
-        return await _executor.GetAsync<ClanWarLeagueGroupDto>($"clans/{encodedTag}/currentwar/leaguegroup");
+        return await _executor.GetAsync<ClanWarLeagueGroupDto>($"clans/{encodedTag}/currentwar/leaguegroup", cancellationToken);
     }
 
-    public async Task<IApiResult<ClanWarLeagueGroupDto>> GetClanWarLeagueWarAsync(string warTag)
+    public async Task<IApiResult<ClanWarLeagueGroupDto>> GetClanWarLeagueWarAsync(string warTag, CancellationToken cancellationToken = default)
     {
         var encodedTag = Uri.EscapeDataString(warTag);
-        return await _executor.GetAsync<ClanWarLeagueGroupDto>($"clans/clanwarleagues/wars/{encodedTag}");
+        return await _executor.GetAsync<ClanWarLeagueGroupDto>($"clans/clanwarleagues/wars/{encodedTag}", cancellationToken);
     }
 }
