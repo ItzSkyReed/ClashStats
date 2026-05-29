@@ -122,7 +122,7 @@ public class Program
 
         builder.Services.AddHostedService<StatsUpdateWorker>();
 
-        builder.Services.AddKeyedSingleton("ClanTag", "#29RJ28YLG");
+        builder.Services.AddKeyedSingleton("ClanTag", builder.Configuration["CLASH_OF_CLANS:MAIN_CLAN_TAG"]!);
     }
 
     private static async Task ApplyMigrations(IServiceProvider services)
