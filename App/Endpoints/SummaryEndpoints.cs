@@ -12,7 +12,7 @@ public static class SummaryEndpoints
 
         group.MapGet("/players", async (IAppDbContext dbContext) =>
             {
-                var summaries = await dbContext.ClanWarPlayerSummaries.ToListAsync();
+                var summaries = await dbContext.ClanWarPlayerSummaries.AsNoTracking().ToListAsync();
                 return TypedResults.Ok(summaries);
             })
             .WithName("get_player_summaries")
@@ -21,12 +21,11 @@ public static class SummaryEndpoints
 
         group.MapGet("/wars", async (IAppDbContext dbContext) =>
             {
-                var summaries = await dbContext.ClanWarSummaries.ToListAsync();
+                var summaries = await dbContext.ClanWarSummaries.AsNoTracking().ToListAsync();
                 return TypedResults.Ok(summaries);
             })
             .WithName("get_clan_war_summaries")
             .WithSummary("Получить статистику по войнам")
             .WithDescription("Возвращает агрегированную статистику по войнам.");
-
     }
 }
