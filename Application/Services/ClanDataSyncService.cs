@@ -36,7 +36,9 @@ public class ClanDataSyncService(
             dbMember.IsNowInClan = currentTags.Contains(dbMember.Tag);
         }
 
-        var tasks = currentTags.Select(async tag =>
+        var playerResults = new ConcurrentBag<(string Tag, IApiResult<PlayerDto> Result)>();
+
+        await Parallel.ForEachAsync(currentTags, new ParallelOptions { MaxDegreeOfParallelism = 10, CancellationToken = ct }, async (tag, _) =>
         {
             var result = await apiClient.GetPlayerAsync(tag, ct);
             playerResults.Add((tag, result));
