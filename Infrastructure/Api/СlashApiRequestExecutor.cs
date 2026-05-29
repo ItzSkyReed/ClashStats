@@ -17,11 +17,11 @@ public class ClashApiRequestExecutor(HttpClient client, IOptions<JsonSerializerO
         if (response.IsSuccessStatusCode)
         {
             var data = JsonSerializer.Deserialize<T>(body, _jsonOptions);
-            return new ApiResult<T>(data, null);
+            return new ApiResult<T>(data, null, response.StatusCode);
         }
 
         var error = JsonSerializer.Deserialize<ClientErrorDto>(body);
-        return new ApiResult<T>(default, error);
+        return new ApiResult<T>(default, error, response.StatusCode);
     }
 
     public async Task<ApiResult<T>> PostAsync<T>(string endpoint, Dictionary<string, object> body)
@@ -31,12 +31,12 @@ public class ClashApiRequestExecutor(HttpClient client, IOptions<JsonSerializerO
         if (response.IsSuccessStatusCode)
         {
             var data = await response.Content.ReadFromJsonAsync<T>();
-            return new ApiResult<T>(data, null);
+            return new ApiResult<T>(data, null, response.StatusCode);
         }
 
         var errorBody = await response.Content.ReadAsStringAsync();
         var error = JsonSerializer.Deserialize<ClientErrorDto>(errorBody);
 
-        return new ApiResult<T>(default, error);
+        return new ApiResult<T>(default, error, response.StatusCode);
     }
 }
