@@ -1,25 +1,7 @@
 ﻿using Domain.Constants;
+using Domain.Models.ClanWars;
 
-namespace Domain.Models.Clans;
-
-// public record PlayerDto
-// {
-//
-//
-//
-//
-//     public required LeagueDto League { get; init; }
-//     public required LeagueTierDto LeagueTier { get; init; }
-//     public required BuilderBaseLeagueDto BuilderBaseLeague { get; init; }
-//
-//     public required string Role { get; init; }
-//     public required string WarPreference { get; init; }
-//
-//     public required int AttackWins { get; init; }
-//     public required int DefenseWins { get; init; }
-//
-//     public required List<LabelDto> Labels { get; init; }
-// }
+namespace Domain.Models;
 
 public record ClanMember
 {

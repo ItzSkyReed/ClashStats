@@ -1,6 +1,6 @@
 ﻿using Domain.Constants;
 
-namespace Domain.Models.Analytics;
+namespace Domain.Models.Analytics.ClanWars;
 
 public record ClanWarSummary
 {

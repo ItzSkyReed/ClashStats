@@ -1,4 +1,4 @@
-﻿using Domain.Models.Clans;
+﻿using Domain.Models.ClanWars;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

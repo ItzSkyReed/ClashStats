@@ -1,9 +1,8 @@
-﻿using Domain.Models.Analytics;
-
-namespace Infrastructure.Persistence.Configurations.Clans;
-
+﻿using Domain.Models.Analytics.ClanWars;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Infrastructure.Persistence.Configurations.Clans;
 
 public class ClanWarPlayerSummaryConfiguration : IEntityTypeConfiguration<ClanWarPlayerSummary>
 {

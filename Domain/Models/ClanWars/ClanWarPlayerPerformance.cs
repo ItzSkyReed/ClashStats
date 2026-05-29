@@ -1,4 +1,4 @@
-﻿namespace Domain.Models.Clans;
+﻿namespace Domain.Models.ClanWars;
 
 public record ClanWarPlayerPerformance
 {

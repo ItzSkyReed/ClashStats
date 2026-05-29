@@ -1,5 +1,5 @@
 ﻿using Domain.Constants;
-using Domain.Models.Clans;
+using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

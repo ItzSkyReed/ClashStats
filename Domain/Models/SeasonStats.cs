@@ -1,6 +1,4 @@
-﻿using Domain.Models.Clans;
-
-namespace Domain.Models;
+﻿namespace Domain.Models;
 
 public record SeasonStats
 {

@@ -1,6 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Constants;
-using Domain.Models.Clans;
+﻿using Domain.Constants;
+using Domain.Models.ClanWars;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
