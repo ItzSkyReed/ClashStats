@@ -1,11 +1,13 @@
-﻿using System.Globalization;
+﻿using System.Collections.Concurrent;
+using System.Globalization;
+using System.Net;
 using Application.DTOs.Clans.ClanWars;
 using Application.DTOs.Leagues;
 using Application.DTOs.Players;
 using Application.Interfaces;
 using Domain.Constants;
 using Domain.Models;
-using Domain.Models.Clans;
+using Domain.Models.ClanWars;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -43,8 +45,6 @@ public class ClanDataSyncService(
             var result = await apiClient.GetPlayerAsync(tag, ct);
             playerResults.Add((tag, result));
         });
-
-        var playerResults = await Task.WhenAll(tasks);
 
         foreach (var item in playerResults)
         {
@@ -177,25 +177,25 @@ public class ClanDataSyncService(
 
             var attacks = memberDto.Attacks?.OrderBy(a => a.Order).ToList() ?? [];
 
-            var a1 = attacks.Count > 0 ? attacks[0] : null;
-            performance.Attack1Stars = (short?)a1?.Stars;
-            performance.Attack1Destruction = (short?)a1?.DestructionPercentage;
-            performance.Attack1Duration = (short?)a1?.Duration;
-            performance.Defender1Tag = a1?.DefenderTag;
+            var attack1 = attacks.Count > 0 ? attacks[0] : null;
+            performance.Attack1Stars = (short?)attack1?.Stars;
+            performance.Attack1Destruction = (short?)attack1?.DestructionPercentage;
+            performance.Attack1Duration = (short?)attack1?.Duration;
+            performance.Defender1Tag = attack1?.DefenderTag;
 
-            var def1 = a1?.DefenderTag is not null ? opponentsLookup.GetValueOrDefault(a1.DefenderTag) : null;
-            performance.Opponent1Position = (short?)def1?.MapPosition;
-            performance.Opponent1TownHallLevel = (short?)def1?.TownhallLevel;
+            var defender1 = attack1?.DefenderTag is not null ? opponentsLookup.GetValueOrDefault(attack1.DefenderTag) : null;
+            performance.Opponent1Position = (short?)defender1?.MapPosition;
+            performance.Opponent1TownHallLevel = (short?)defender1?.TownhallLevel;
 
-            var a2 = attacks.Count > 1 ? attacks[1] : null;
-            performance.Attack2Stars = (short?)a2?.Stars;
-            performance.Attack2Destruction = (short?)a2?.DestructionPercentage;
-            performance.Attack2Duration = (short?)a2?.Duration;
-            performance.Defender2Tag = a2?.DefenderTag;
+            var attack2 = attacks.Count > 1 ? attacks[1] : null;
+            performance.Attack2Stars = (short?)attack2?.Stars;
+            performance.Attack2Destruction = (short?)attack2?.DestructionPercentage;
+            performance.Attack2Duration = (short?)attack2?.Duration;
+            performance.Defender2Tag = attack2?.DefenderTag;
 
-            var def2 = a2?.DefenderTag is not null ? opponentsLookup.GetValueOrDefault(a2.DefenderTag) : null;
-            performance.Opponent2Position = (short?)def2?.MapPosition;
-            performance.Opponent2TownHallLevel = (short?)def2?.TownhallLevel;
+            var defender2 = attack2?.DefenderTag is not null ? opponentsLookup.GetValueOrDefault(attack2.DefenderTag) : null;
+            performance.Opponent2Position = (short?)defender2?.MapPosition;
+            performance.Opponent2TownHallLevel = (short?)defender2?.TownhallLevel;
         }
 
         var savedRows = await dbContext.SaveChangesAsync(ct);
