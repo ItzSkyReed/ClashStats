@@ -113,6 +113,7 @@ public partial class ClashApiClient
     }
 
     /// <param name="leagueId">Now this works only for leagueId = 29000022 (Legend League) </param>
+    /// <param name="cancellationToken">Cancellation token</param>
     public async Task<IApiResult<LeagueSeasonListDto>> GetLeagueSeasonsAsync(uint leagueId = 29000022, CancellationToken cancellationToken = default)
     {
         return await _executor.GetAsync<LeagueSeasonListDto>($"leagues/{leagueId}/seasons", cancellationToken);
