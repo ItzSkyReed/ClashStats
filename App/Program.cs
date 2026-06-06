@@ -119,10 +119,12 @@ public class Program
 
         builder.Services.AddScoped<IClashApiClient, ClashApiClient>();
         builder.Services.AddScoped<IClanDataSyncService, ClanDataSyncService>();
+        builder.Services.AddScoped<IWarLeagueService, WarLeagueService>();
 
         builder.Services.AddHostedService<StatsUpdateWorker>();
 
-        builder.Services.AddKeyedSingleton("ClanTag", builder.Configuration["CLASH_OF_CLANS:MAIN_CLAN_TAG"]!);
+        var clanTag = builder.Configuration["CLASH_OF_CLANS:MAIN_CLAN_TAG"] ?? "TEMPORARY_MIGRATION_TAG";
+        builder.Services.AddKeyedSingleton("ClanTag", clanTag);
     }
 
     private static async Task ApplyMigrations(IServiceProvider services)
