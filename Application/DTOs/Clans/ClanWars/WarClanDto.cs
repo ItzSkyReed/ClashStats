@@ -2,8 +2,8 @@
 
 public record WarClanDto
 {
-    public required string Tag { get; init; }
-    public required string Name { get; init; }
+    public string? Tag { get; init; }
+    public string? Name { get; init; }
     public required BadgeUrlsDto BadgeUrls { get; init; }
     public required int ClanLevel { get; init; }
     public required int Attacks { get; init; }

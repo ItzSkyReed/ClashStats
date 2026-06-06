@@ -1,6 +1,6 @@
 ﻿namespace Application.DTOs.Clans.ClanWarLeagues;
 
-public record ClanWarLeagueClanDto
+public record ClanWarLeagueGroupClanDto
 {
     public required string Tag { get; init; }
     public required int ClanLevel { get; init; }
