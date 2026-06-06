@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Net;
 using Application.DTOs.Clans.ClanWarLeagues;
 using Application.DTOs.Players;
+using Application.Extensions;
 using Application.Interfaces;
 using Domain.Constants;
 using Domain.Models;
@@ -250,108 +251,149 @@ public class ClanDataSyncService(
         await dbContext.SaveChangesAsync(ct);
     }
 
-    private static void UpdateMemberData(ClanMember entity, PlayerDto playerApiData)
+    public async Task UpdateClanLeagueWars(CancellationToken ct)
     {
-        entity.Name = playerApiData.Name;
-        entity.Trophies = (short)playerApiData.Trophies;
-        entity.BestBuilderBaseTrophies = (short)playerApiData.BestBuilderBaseTrophies;
-        entity.BuilderBaseTrophies = (short)playerApiData.BuilderBaseTrophies;
-        entity.ExpLevel = (short)playerApiData.ExpLevel;
-        entity.Role = playerApiData.Role;
-        entity.TownHallLevel = (short)playerApiData.TownHallLevel;
-        entity.BuilderHallLevel = (short)playerApiData.BuilderHallLevel;
-        entity.WarPreference = playerApiData.WarPreference;
-        entity.ClanCapitalContributions = playerApiData.ClanCapitalContributions;
-        entity.WarStars = playerApiData.WarStars;
+        var leagueResult = await apiClient.GetCurrentClanWarLeagueGroupAsync(clanTag, ct);
+
+        if (leagueResult.StatusCode == HttpStatusCode.NotFound)
+            return;
+
+        if (leagueResult.Error != null)
+        {
+            logger.LogError("Api error while getting league group: {ErrorMessage}", leagueResult.Error.Message);
+            return; // Если ошибка, дальше идти нет смысла
+        }
+
+        var leagueGroup = leagueResult.Data;
+
+        if (leagueGroup?.State != ClanWarLeagueState.WarEnded && leagueGroup?.State != ClanWarLeagueState.InWar)
+            return;
+
+        await SyncLeagueGroupAsync(leagueGroup, ct);
+
+        var (downloadedWars, warRoundInfos) = await DownloadLeagueWarsAsync(leagueGroup, ct);
+
+        if (downloadedWars.IsEmpty)
+            return;
+
+        // Синхронизируем войны и статистику игроков
+        await SyncWarsAndPerformancesAsync(leagueGroup.Season, downloadedWars, warRoundInfos, ct);
+
+        await dbContext.SaveChangesAsync(ct);
     }
 
-    private static void UpdateClanWarData(ClanWar entity, ClanWarDto apiData)
+    private async Task SyncLeagueGroupAsync(ClanWarLeagueGroupDto leagueGroup, CancellationToken ct)
     {
-        entity.State = apiData.State;
-        entity.EndTime = apiData.EndTime;
-        entity.StartTime = apiData.StartTime;
-        entity.ExpEarned = (short?)apiData.Clan.ExpEarned;
-        entity.TeamSize = (short)apiData.TeamSize;
+        var groupEntity = await dbContext.ClanWarLeagueGroups
+            .FirstOrDefaultAsync(t => t.Season == leagueGroup.Season, ct);
 
-        entity.OpponentAttacks = (short)apiData.Opponent!.Attacks;
-        entity.OpponentClanLevel = (short)apiData.Opponent.ClanLevel;
-        entity.OpponentClanName = apiData.Opponent.Name;
-        entity.OpponentClanTag = apiData.Opponent.Tag;
-        entity.OpponentDestructionPercentage = apiData.Opponent.DestructionPercentage;
-        entity.OpponentStars = (short)apiData.Opponent.Stars;
+        var rankings = await warLeagueService.CalculateClanWarLeagueRankings(leagueGroup, ct);
+        var place = rankings != null ? warLeagueService.GetClanPlace(clanTag, rankings) : null;
 
-        entity.OurAttacks = (short)apiData.Clan.Attacks;
-        entity.OurDestructionPercentage = apiData.Clan.DestructionPercentage;
-        entity.OurStars = (short)apiData.Clan.Stars;
+        if (groupEntity == null)
+        {
+            groupEntity = new ClanWarLeagueGroup
+            {
+                Season = leagueGroup.Season,
+                State = leagueGroup.State,
+                TeamSize = await warLeagueService.GetLeagueWarTeamSize(leagueGroup, ct),
+                Place = place
+            };
+
+            await dbContext.ClanWarLeagueGroups.AddAsync(groupEntity, ct);
+        }
+        else
+        {
+            groupEntity.State = leagueGroup.State;
+            groupEntity.Place = place;
+        }
     }
 
-    private static void UpdateClanWarData(ClanWar entity, ClanWarLogEntryDto apiData)
+    private async Task<(ConcurrentDictionary<string, ClanWarLeaguerWarDto> Wars, List<(string Tag, short Round)> RoundInfos)>
+        DownloadLeagueWarsAsync(ClanWarLeagueGroupDto leagueGroup, CancellationToken ct)
     {
-        entity.State = ClanWarState.WarEnded;
-        entity.EndTime = apiData.EndTime;
-        if (entity.StartTime == DateTime.MinValue)
-            entity.StartTime = apiData.EndTime - new TimeSpan(48, 0, 0); // Approximately
+        var warRoundInfos = leagueGroup.Rounds
+            .Select((round, index) => new { RoundNumber = (short)(index + 1), round.WarTags })
+            .SelectMany(r => r.WarTags
+                .Where(tag => tag != "#0")
+                .Select(tag => (Tag: tag, Round: r.RoundNumber)))
+            .ToList();
 
-        entity.ExpEarned = (short?)apiData.Clan.ExpEarned;
-        entity.TeamSize = (short)apiData.TeamSize;
+        var warTags = warRoundInfos.Select(x => x.Tag).Distinct().ToList();
+        var downloadedWars = new ConcurrentDictionary<string, ClanWarLeaguerWarDto>();
 
-        entity.OpponentAttacks = (short)apiData.Opponent.Attacks;
-        entity.OpponentClanLevel = (short)apiData.Opponent.ClanLevel;
-        entity.OpponentClanName = apiData.Opponent.Name;
-        entity.OpponentClanTag = apiData.Opponent.Tag;
-        entity.OpponentDestructionPercentage = apiData.Opponent.DestructionPercentage;
-        entity.OpponentStars = (short)apiData.Opponent.Stars;
+        await Parallel.ForEachAsync(warTags, ct, async (tag, token) =>
+        {
+            var war = await apiClient.GetClanWarLeagueWarAsync(tag, token).UnwrapOrLogAsync(logger);
+            if (war != null)
+            {
+                downloadedWars.TryAdd(tag, war);
+            }
+        });
 
-        entity.OurAttacks = (short)apiData.Clan.Attacks;
-        entity.OurDestructionPercentage = apiData.Clan.DestructionPercentage;
-        entity.OurStars = (short)apiData.Clan.Stars;
+        return (downloadedWars, warRoundInfos);
     }
 
-    private async Task<ClanMemberListDto?> GetClanMembers(string tag, CancellationToken ct)
+    private async Task SyncWarsAndPerformancesAsync(
+        string season,
+        ConcurrentDictionary<string, ClanWarLeaguerWarDto> downloadedWars,
+        List<(string Tag, short Round)> warRoundInfos,
+        CancellationToken ct)
     {
-        var clanResult = await apiClient.GetClanMembersAsync(tag, cancellationToken: ct);
+        var fetchedTags = downloadedWars.Keys.ToList();
 
-        if (clanResult.Error is not { } clanError)
-            return clanResult.Data;
+        var existingDbWars = await dbContext.ClanWarLeagueWars
+            .Where(w => fetchedTags.Contains(w.WarTag))
+            .ToDictionaryAsync(w => w.WarTag, ct);
 
-        logger.LogError("Api error while getting clan members: {ErrorMessage}", clanError.Message);
+        var existingPerformances = await dbContext.ClanWarLeaguePlayerPerformances
+            .Where(p => fetchedTags.Contains(p.WarTag))
+            .ToListAsync(ct);
 
-        return null;
-    }
+        var perfLookup = existingPerformances.ToDictionary(p => (p.WarTag, p.PlayerTag));
 
-    private async Task<ClanWarDto?> GetClanWar(string tag, CancellationToken ct)
-    {
-        var warResult = await apiClient.GetCurrentClanWarAsync(tag, ct);
+        foreach (var (tag, incomingWar) in downloadedWars)
+        {
+            if (incomingWar.Clan.Tag != clanTag && incomingWar.Opponent.Tag != clanTag)
+                continue;
 
-        if (warResult.Error is not { } clanError)
-            return warResult.Data;
+            if (!existingDbWars.TryGetValue(tag, out var dbWar))
+            {
+                var roundNumber = warRoundInfos.FirstOrDefault(x => x.Tag == tag).Round;
 
-        logger.LogError("Api error while getting current clan war: {ErrorMessage}", clanError.Message);
+                dbWar = new ClanWarLeagueWar
+                {
+                    WarTag = tag,
+                    State = incomingWar.State,
+                    Season = season,
+                    Round = roundNumber
+                };
+                await dbContext.ClanWarLeagueWars.AddAsync(dbWar, ct);
+            }
 
-        return null;
-    }
+            dbWar.UpdateFromClanWarLeaguerWarDto(incomingWar, clanTag);
 
-    private async Task<LeagueSeasonListDto?> GetLeagueSeasons(CancellationToken ct)
-    {
-        var leagueResult = await apiClient.GetLeagueSeasonsAsync(cancellationToken: ct);
+            var ourSide = incomingWar.Clan.Tag == clanTag ? incomingWar.Clan : incomingWar.Opponent;
+            var oppSide = incomingWar.Clan.Tag == clanTag ? incomingWar.Opponent : incomingWar.Clan;
 
-        if (leagueResult.Error is not { } leagueResultError)
-            return leagueResult.Data;
+            var opponentsLookup = oppSide.Members?.ToDictionary(m => m.Tag) ?? [];
 
-        logger.LogError("Api error while getting league season: {ErrorMessage}", leagueResultError.Message);
+            foreach (var memberDto in ourSide.Members ?? [])
+            {
+                if (!perfLookup.TryGetValue((tag, memberDto.Tag), out var playerPerf))
+                {
+                    playerPerf = new ClanWarLeaguePlayerPerformance
+                    {
+                        WarTag = tag,
+                        PlayerTag = memberDto.Tag
+                    };
 
-        return null;
-    }
+                    await dbContext.ClanWarLeaguePlayerPerformances.AddAsync(playerPerf, ct);
+                    perfLookup.TryAdd((tag, memberDto.Tag), playerPerf);
+                }
 
-    private async Task<ClanWarLogDto?> GetClanWarLog(CancellationToken ct)
-    {
-        var logResult = await apiClient.GetClanWarLogAsync(clanTag, cancellationToken: ct);
-
-        if (logResult.Error is not { } logResultError)
-            return logResult.Data;
-
-        logger.LogError("Api error while getting war log: {ErrorMessage}", logResultError.Message);
-
-        return null;
+                playerPerf.UpdateFromClanWarMemberDto(memberDto, opponentsLookup);
+            }
+        }
     }
 }

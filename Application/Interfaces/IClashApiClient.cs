@@ -33,7 +33,7 @@ public interface IClashApiClient
 
     public Task<IApiResult<ClanWarLeagueGroupDto>> GetCurrentClanWarLeagueGroupAsync(string clanTag, CancellationToken cancellationToken = default);
 
-    public Task<IApiResult<ClanWarLeagueGroupDto>> GetClanWarLeagueWarAsync(string warTag, CancellationToken cancellationToken = default);
+    public Task<IApiResult<ClanWarLeaguerWarDto>> GetClanWarLeagueWarAsync(string warTag, CancellationToken cancellationToken = default);
 
     public Task<IApiResult<LabelListDto>> GetPlayerLabelsAsync(uint? limit = null, string? after = null, string? before = null,
         CancellationToken cancellationToken = default);

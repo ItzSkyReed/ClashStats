@@ -7,4 +7,5 @@ public interface IClanDataSyncService
     public Task<bool> UpdateClanWar(CancellationToken ct);
     public Task RefreshMaterializedViews(CancellationToken ct);
     public Task CleanupStuckWars(CancellationToken ct);
+    public Task UpdateClanLeagueWars(CancellationToken ct);
 }
