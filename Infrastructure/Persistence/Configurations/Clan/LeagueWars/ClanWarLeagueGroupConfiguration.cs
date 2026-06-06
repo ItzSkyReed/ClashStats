@@ -3,7 +3,7 @@ using Domain.Models.ClanWarLeagues;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Persistence.Configurations.Clans.LeagueWars;
+namespace Infrastructure.Persistence.Configurations.Clan.LeagueWars;
 
 public class ClanWarLeagueGroupConfiguration : IEntityTypeConfiguration<ClanWarLeagueGroup>
 {

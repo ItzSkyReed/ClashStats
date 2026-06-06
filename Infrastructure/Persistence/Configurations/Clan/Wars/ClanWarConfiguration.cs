@@ -3,7 +3,7 @@ using Domain.Models.ClanWars;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Persistence.Configurations.Clans.Wars;
+namespace Infrastructure.Persistence.Configurations.Clan.Wars;
 
 public class ClanWarConfiguration : IEntityTypeConfiguration<ClanWar>
 {

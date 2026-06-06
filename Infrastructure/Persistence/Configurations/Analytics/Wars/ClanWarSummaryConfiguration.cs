@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Persistence.Configurations.Clans;
+namespace Infrastructure.Persistence.Configurations.Clan;
 
 public class ClanWarSummaryConfiguration : IEntityTypeConfiguration<ClanWarSummary>
 {

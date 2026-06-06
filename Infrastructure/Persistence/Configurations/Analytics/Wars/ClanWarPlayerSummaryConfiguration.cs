@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Persistence.Configurations.Clans;
+namespace Infrastructure.Persistence.Configurations.Clan;
 
 public class ClanWarPlayerSummaryConfiguration : IEntityTypeConfiguration<ClanWarPlayerSummary>
 {
@@ -19,6 +19,7 @@ public class ClanWarPlayerSummaryConfiguration : IEntityTypeConfiguration<ClanWa
         builder.Property(x => x.AverageOpponentTownHallLevel);
         builder.Property(x => x.AttackParticipationRate);
         builder.Property(x => x.AverageDestructionPercentage);
+        builder.Property(x => x.AverageStarsPerAttack);
         builder.Property(x => x.AverageStarsPerWar);
         builder.Property(x => x.FirstAttackParticipationRate);
         builder.Property(x => x.SecondAttackParticipationRate);
