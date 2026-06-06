@@ -5,7 +5,7 @@ namespace Application.DTOs.Clans.ClanWarLeagues;
 
 public record ClanWarLeaguerWarDto
 {
-    public ClanWarLeagueState State { get; init; }
+    public ClanWarLeagueState? State { get; init; }
     public int TeamSize { get; init; }
     public DateTime PreparationStartTime { get; init; }
     public DateTime StartTime { get; init; }

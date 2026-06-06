@@ -364,7 +364,7 @@ public class ClanDataSyncService(
                 dbWar = new ClanWarLeagueWar
                 {
                     WarTag = tag,
-                    State = incomingWar.State,
+                    State = incomingWar.State!,
                     Season = season,
                     Round = roundNumber
                 };

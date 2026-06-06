@@ -68,8 +68,8 @@ public class WarLeagueService(IClashApiClient apiClient, ILogger<WarLeagueServic
             .ThenByDescending(c => c.TotalDestruction)
             .Select((clan, index) => new IWarLeagueService.ClanLeagueRanking(
                 Place: (short)(index + 1),
-                Tag: clan.Tag,
-                Name: clan.Name,
+                Tag: clan.Tag!,
+                Name: clan.Name!,
                 TotalStars: clan.TotalStars,
                 TotalDestruction: clan.TotalDestruction
             ))

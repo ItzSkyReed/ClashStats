@@ -57,7 +57,7 @@ public static class ClanModelsMappingExtensions
 
     public static void UpdateFromClanWarLeaguerWarDto(this ClanWarLeagueWar entity, in ClanWarLeaguerWarDto apiData, string ourClanTag)
     {
-        entity.State = apiData.State;
+        entity.State = apiData.State!;
         entity.EndTime = apiData.EndTime;
         entity.StartTime = apiData.StartTime;
         entity.WarStartTime = apiData.WarStartTime;
