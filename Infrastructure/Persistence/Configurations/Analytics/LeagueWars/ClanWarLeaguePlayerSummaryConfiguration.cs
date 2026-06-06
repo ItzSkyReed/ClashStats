@@ -27,6 +27,7 @@ public class ClanWarLeaguePlayerSummaryConfiguration : IEntityTypeConfiguration<
         builder.Property(x => x.MirrorAttacksRate);
         builder.Property(x => x.ThreeStarRateAgainstSameTh);
         builder.Property(x => x.AverageThMismatches);
-        builder.Property(x => x.CwlRoundsAttacks).HasColumnType("smallint[]");
+        // TODO: сделать нормальный фикс через миграцию
+        builder.Property(x => x.CwlRoundsAttacks).HasColumnType("smallint[]").HasColumnName("RecentCwlRoundsAttacks");
     }
 }
