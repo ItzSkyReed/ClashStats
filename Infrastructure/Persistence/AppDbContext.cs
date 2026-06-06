@@ -44,7 +44,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public async Task RefreshCwlPlayerSummariesViewAsync(CancellationToken ct = default)
     {
         await Database.ExecuteSqlRawAsync(
-            "REFRESH MATERIALIZED VIEW CONCURRENTLY mv_clan_war_league_player_summaries;",
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY mv_clan_war_leagues_player_summaries;",
             ct);
     }
 

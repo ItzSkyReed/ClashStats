@@ -139,7 +139,7 @@ namespace Infrastructure.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("mv_clan_war_league_player_summaries", (string)null);
+                    b.ToView("mv_clan_war_leagues_player_summaries", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Analytics.ClanWars.ClanWarPlayerSummary", b =>
