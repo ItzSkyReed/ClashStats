@@ -8,7 +8,7 @@ public class ClanWarLeaguePlayerSummaryConfiguration : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<ClanWarLeaguesPlayerSummary> builder)
     {
-        builder.ToView("mv_clan_war_league_player_summaries");
+        builder.ToView("mv_clan_war_leagues_player_summaries");
 
         builder.HasKey(x => new { x.Tag, x.Season });
 
