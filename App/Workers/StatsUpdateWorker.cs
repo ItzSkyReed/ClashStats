@@ -75,7 +75,7 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error executing task: {TaskName}", taskName);
+                    LogErrorExecutingTaskTaskname(taskName, ex);
                 }
             }
         }
@@ -90,4 +90,7 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
 
     [LoggerMessage(LogLevel.Information, "Stopping task {TaskName}...")]
     partial void LogStoppingTaskTaskName(string taskName);
+
+    [LoggerMessage(LogLevel.Error, "Error executing task: {TaskName}")]
+    partial void LogErrorExecutingTaskTaskname(string taskName, Exception exception);
 }
