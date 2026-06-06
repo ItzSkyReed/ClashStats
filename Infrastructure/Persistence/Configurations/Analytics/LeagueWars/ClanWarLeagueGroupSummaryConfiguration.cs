@@ -9,7 +9,7 @@ public class ClanWarLeagueGroupSummaryConfiguration : IEntityTypeConfiguration<C
 {
     public void Configure(EntityTypeBuilder<ClanWarLeagueGroupSummary> builder)
     {
-        builder.ToView("mv_clan_war_league_group_summaries");
+        builder.ToView("mv_clan_war_leagues_group_summaries");
 
         builder.HasKey(x => x.Season);
 
