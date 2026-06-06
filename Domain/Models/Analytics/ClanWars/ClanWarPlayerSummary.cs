@@ -27,6 +27,14 @@ public record ClanWarPlayerSummary
     public float AverageDestructionPercentage { get; set; }
 
     /// <summary>
+    /// Среднее количество выбитых звезд за каждую атаку по отдельности, не считаются не сделаенные атаки
+    /// </summary>
+    /// <example>
+    /// 2.33 среднее кол-во звезд.
+    /// </example>
+    public float AverageStarsPerAttack { get; set; }
+
+    /// <summary>
     /// Среднее количество выбитых звезд за все проведенные атаки.
     /// </summary>
     /// <example>
