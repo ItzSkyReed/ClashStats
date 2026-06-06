@@ -112,9 +112,9 @@ public partial class ClashApiClient
         return await _executor.GetAsync<ClanWarLeagueGroupDto>($"clans/{encodedTag}/currentwar/leaguegroup", cancellationToken);
     }
 
-    public async Task<IApiResult<ClanWarLeagueGroupDto>> GetClanWarLeagueWarAsync(string warTag, CancellationToken cancellationToken = default)
+    public async Task<IApiResult<ClanWarLeaguerWarDto>> GetClanWarLeagueWarAsync(string warTag, CancellationToken cancellationToken = default)
     {
         var encodedTag = Uri.EscapeDataString(warTag);
-        return await _executor.GetAsync<ClanWarLeagueGroupDto>($"clans/clanwarleagues/wars/{encodedTag}", cancellationToken);
+        return await _executor.GetAsync<ClanWarLeaguerWarDto>($"clanwarleagues/wars/{encodedTag}", cancellationToken);
     }
 }
