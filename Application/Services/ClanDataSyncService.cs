@@ -202,10 +202,16 @@ public class ClanDataSyncService(
         return savedRows > 0;
     }
 
-    public async Task RefreshMaterializedViews(CancellationToken ct)
+    public async Task RefreshCwMaterializedViews(CancellationToken ct)
     {
-        await dbContext.RefreshPlayerSummariesViewAsync(ct);
-        await dbContext.RefreshClanWarSummariesViewAsync(ct);
+        await dbContext.RefreshCwPlayerSummariesViewAsync(ct);
+        await dbContext.RefreshCwClanWarSummariesViewAsync(ct);
+    }
+
+    public async Task RefreshCwlMaterializedViews(CancellationToken ct)
+    {
+        await dbContext.RefreshCwlPlayerSummariesViewAsync(ct);
+        await dbContext.RefreshCwlClanWarSummariesViewAsync(ct);
     }
 
     public async Task CleanupStuckWars(CancellationToken ct)
@@ -251,35 +257,36 @@ public class ClanDataSyncService(
         await dbContext.SaveChangesAsync(ct);
     }
 
-    public async Task UpdateClanLeagueWars(CancellationToken ct)
+    public async Task<bool> UpdateClanLeagueWars(CancellationToken ct)
     {
         var leagueResult = await apiClient.GetCurrentClanWarLeagueGroupAsync(clanTag, ct);
 
         if (leagueResult.StatusCode == HttpStatusCode.NotFound)
-            return;
+            return false;
 
         if (leagueResult.Error != null)
         {
             logger.LogError("Api error while getting league group: {ErrorMessage}", leagueResult.Error.Message);
-            return; // Если ошибка, дальше идти нет смысла
+            return false; // Если ошибка, дальше идти нет смысла
         }
 
         var leagueGroup = leagueResult.Data;
 
         if (leagueGroup?.State != ClanWarLeagueState.WarEnded && leagueGroup?.State != ClanWarLeagueState.InWar)
-            return;
+            return false;
 
         await SyncLeagueGroupAsync(leagueGroup, ct);
 
         var (downloadedWars, warRoundInfos) = await DownloadLeagueWarsAsync(leagueGroup, ct);
 
         if (downloadedWars.IsEmpty)
-            return;
+            return false;
 
         // Синхронизируем войны и статистику игроков
         await SyncWarsAndPerformancesAsync(leagueGroup.Season, downloadedWars, warRoundInfos, ct);
 
-        await dbContext.SaveChangesAsync(ct);
+        var savedRows = await dbContext.SaveChangesAsync(ct);
+        return savedRows > 0;
     }
 
     private async Task SyncLeagueGroupAsync(ClanWarLeagueGroupDto leagueGroup, CancellationToken ct)

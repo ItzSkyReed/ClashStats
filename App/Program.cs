@@ -130,7 +130,6 @@ public class Program
     private static async Task ApplyMigrations(IServiceProvider services)
     {
         using var scope = services.CreateScope();
-
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         try

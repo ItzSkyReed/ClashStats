@@ -18,8 +18,11 @@ public interface IAppDbContext
     public DbSet<ClanWarLeagueWar> ClanWarLeagueWars { get; set; }
     public DbSet<ClanWarLeaguePlayerPerformance> ClanWarLeaguePlayerPerformances { get; set; }
 
-    public Task RefreshPlayerSummariesViewAsync(CancellationToken ct = default);
-    public Task RefreshClanWarSummariesViewAsync(CancellationToken ct = default);
+    public Task RefreshCwPlayerSummariesViewAsync(CancellationToken ct = default);
+    public Task RefreshCwClanWarSummariesViewAsync(CancellationToken ct = default);
+
+    public Task RefreshCwlPlayerSummariesViewAsync(CancellationToken ct = default);
+    public Task RefreshCwlClanWarSummariesViewAsync(CancellationToken ct = default);
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -22,7 +22,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ClanWarLeagueWar> ClanWarLeagueWars { get; set; }
     public DbSet<ClanWarLeaguePlayerPerformance> ClanWarLeaguePlayerPerformances { get; set; }
 
-    public async Task RefreshPlayerSummariesViewAsync(CancellationToken ct = default)
+    public async Task RefreshCwPlayerSummariesViewAsync(CancellationToken ct = default)
     {
         await Database.ExecuteSqlRawAsync(
             "REFRESH MATERIALIZED VIEW CONCURRENTLY mv_clan_war_player_summaries;",
@@ -30,11 +30,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     }
 
     public async Task RefreshClanWarSummariesViewAsync(CancellationToken ct = default)
+    public async Task RefreshCwClanWarSummariesViewAsync(CancellationToken ct = default)
     {
         await Database.ExecuteSqlRawAsync(
             "REFRESH MATERIALIZED VIEW CONCURRENTLY mv_clan_war_summaries;",
             ct);
     }
+
+    public async Task RefreshCwlPlayerSummariesViewAsync(CancellationToken ct = default)
+    {
+        await Database.ExecuteSqlRawAsync(
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY mv_clan_war_league_player_summaries;",
+            ct);
+    }
+
+    {
+        await Database.ExecuteSqlRawAsync(
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY mv_clan_war_summaries;",
+            ct);
+    }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
