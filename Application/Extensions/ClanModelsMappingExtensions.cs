@@ -66,14 +66,14 @@ public static class ClanModelsMappingExtensions
         var our = apiData.Clan.Tag == ourClanTag ? apiData.Clan : apiData.Opponent;
         var opp = apiData.Clan.Tag == ourClanTag ? apiData.Opponent : apiData.Clan;
 
-        entity.OpponentAttacks = (short)opp.Attacks;
+        entity.OpponentAttacks = (short)opp.Attacks!;
         entity.OpponentClanLevel = (short)opp.ClanLevel;
         entity.OpponentClanName = opp.Name!;
         entity.OpponentClanTag = opp.Tag!;
         entity.OpponentDestructionPercentage = opp.DestructionPercentage;
         entity.OpponentStars = (short)opp.Stars;
 
-        entity.OurAttacks = (short)our.Attacks;
+        entity.OurAttacks = (short)our.Attacks!;
         entity.OurStars = (short)our.Stars;
         entity.OurDestructionPercentage = our.DestructionPercentage;
     }
@@ -90,14 +90,14 @@ public static class ClanModelsMappingExtensions
             entity.ExpEarned = (short?)apiData.Clan.ExpEarned;
             entity.TeamSize = (short)apiData.TeamSize;
 
-            entity.OpponentAttacks = (short)apiData.Opponent.Attacks;
+            entity.OpponentAttacks = (short)apiData.Opponent.Attacks!;
             entity.OpponentClanLevel = (short)apiData.Opponent.ClanLevel;
             entity.OpponentClanName = apiData.Opponent.Name;
             entity.OpponentClanTag = apiData.Opponent.Tag;
             entity.OpponentDestructionPercentage = apiData.Opponent.DestructionPercentage;
             entity.OpponentStars = (short)apiData.Opponent.Stars;
 
-            entity.OurAttacks = (short)apiData.Clan.Attacks;
+            entity.OurAttacks = (short)apiData.Clan.Attacks!;
             entity.OurDestructionPercentage = apiData.Clan.DestructionPercentage;
             entity.OurStars = (short)apiData.Clan.Stars;
         }
@@ -110,14 +110,14 @@ public static class ClanModelsMappingExtensions
             entity.ExpEarned = (short?)apiData.Clan.ExpEarned;
             entity.TeamSize = (short)apiData.TeamSize!;
 
-            entity.OpponentAttacks = (short)apiData.Opponent!.Attacks;
+            entity.OpponentAttacks = (short)apiData.Opponent!.Attacks!;
             entity.OpponentClanLevel = (short)apiData.Opponent.ClanLevel;
             entity.OpponentClanName = apiData.Opponent.Name;
             entity.OpponentClanTag = apiData.Opponent.Tag;
             entity.OpponentDestructionPercentage = apiData.Opponent.DestructionPercentage;
             entity.OpponentStars = (short)apiData.Opponent.Stars;
 
-            entity.OurAttacks = (short)apiData.Clan.Attacks;
+            entity.OurAttacks = (short)apiData.Clan.Attacks!;
             entity.OurDestructionPercentage = apiData.Clan.DestructionPercentage;
             entity.OurStars = (short)apiData.Clan.Stars;
         }
