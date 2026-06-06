@@ -29,7 +29,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             ct);
     }
 
-    public async Task RefreshClanWarSummariesViewAsync(CancellationToken ct = default)
     public async Task RefreshCwClanWarSummariesViewAsync(CancellationToken ct = default)
     {
         await Database.ExecuteSqlRawAsync(
