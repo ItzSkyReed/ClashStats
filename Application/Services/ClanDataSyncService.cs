@@ -1,12 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using System.Globalization;
 using System.Net;
-using Application.DTOs.Clans.ClanWars;
-using Application.DTOs.Leagues;
+using Application.DTOs.Clans.ClanWarLeagues;
 using Application.DTOs.Players;
 using Application.Interfaces;
 using Domain.Constants;
 using Domain.Models;
+using Domain.Models.ClanWarLeagues;
 using Domain.Models.ClanWars;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,13 +18,12 @@ public class ClanDataSyncService(
     IAppDbContext dbContext,
     IClashApiClient apiClient,
     [FromKeyedServices("ClanTag")] string clanTag,
-    ILogger<ClanDataSyncService> logger) : IClanDataSyncService
+    ILogger<ClanDataSyncService> logger,
+    IWarLeagueService warLeagueService) : IClanDataSyncService
 {
-    private static readonly ClanWarState[] ActiveWarStates = [ClanWarState.InWar, ClanWarState.WarEnded];
-
     public async Task UpdateClanMembers(CancellationToken ct)
     {
-        var clanMembers = await GetClanMembers(clanTag, ct);
+        var clanMembers = await apiClient.GetClanMembersAsync(clanTag, cancellationToken: ct).UnwrapOrLogAsync(logger);
 
         if (clanMembers is null)
             return;
@@ -40,7 +39,7 @@ public class ClanDataSyncService(
 
         var playerResults = new ConcurrentBag<(string Tag, IApiResult<PlayerDto> Result)>();
 
-        await Parallel.ForEachAsync(currentTags, new ParallelOptions { MaxDegreeOfParallelism = 10, CancellationToken = ct }, async (tag, _) =>
+        await Parallel.ForEachAsync(currentTags, ct, async (tag, _) =>
         {
             var result = await apiClient.GetPlayerAsync(tag, ct);
             playerResults.Add((tag, result));
@@ -52,13 +51,13 @@ public class ClanDataSyncService(
             {
                 if (dbMembersDict.TryGetValue(player.Tag, out var existingDbMember))
                 {
-                    UpdateMemberData(existingDbMember, player);
+                    existingDbMember.UpdateFromPlayerDto(player);
                     existingDbMember.IsNowInClan = true;
                 }
                 else
                 {
                     var newMember = new ClanMember { Tag = player.Tag, IsNowInClan = true, Name = player.Name };
-                    UpdateMemberData(newMember, player);
+                    newMember.UpdateFromPlayerDto(player);
                     dbContext.ClanMembers.Add(newMember);
                 }
             }
@@ -73,7 +72,7 @@ public class ClanDataSyncService(
 
     public async Task UpdateSeasonStats(CancellationToken ct)
     {
-        var leagueData = await GetLeagueSeasons(ct);
+        var leagueData = await apiClient.GetLeagueSeasonsAsync(cancellationToken: ct).UnwrapOrLogAsync(logger);
 
         if (leagueData is null)
             return;
@@ -86,7 +85,7 @@ public class ClanDataSyncService(
 
         var latestSeason = DateOnly.FromDateTime(parsedDateTime.UtcDateTime);
 
-        var clanMembers = await GetClanMembers(clanTag, ct);
+        var clanMembers = await apiClient.GetClanMembersAsync(clanTag, cancellationToken: ct).UnwrapOrLogAsync(logger);
         if (clanMembers is null)
             return;
 
@@ -128,12 +127,12 @@ public class ClanDataSyncService(
 
     public async Task<bool> UpdateClanWar(CancellationToken ct)
     {
-        var clanWarData = await GetClanWar(clanTag, ct);
+        var clanWarData = await apiClient.GetCurrentClanWarAsync(clanTag, ct).UnwrapOrLogAsync(logger);
 
         if (clanWarData is null)
             return false;
 
-        if (!ActiveWarStates.Contains(clanWarData.State))
+        if (clanWarData.State != ClanWarState.WarEnded && clanWarData.State != ClanWarState.InWar)
             return false;
 
         var currentWar = await dbContext.ClanWars
@@ -150,7 +149,7 @@ public class ClanDataSyncService(
             dbContext.ClanWars.Add(currentWar);
         }
 
-        UpdateClanWarData(currentWar, clanWarData);
+        currentWar.UpdateFromClanWarDto(clanWarData);
 
         currentWar.PlayersPerformances ??= [];
 
@@ -221,7 +220,7 @@ public class ClanDataSyncService(
         if (stuckWars.Count == 0)
             return;
 
-        var warLog = await GetClanWarLog(ct);
+        var warLog = await apiClient.GetClanWarLogAsync(clanTag, cancellationToken: ct).UnwrapOrLogAsync(logger);
 
         if (warLog is null)
         {
@@ -236,7 +235,7 @@ public class ClanDataSyncService(
         {
             if (warLogDict.TryGetValue(war.EndTime.Ticks, out var logEntry))
             {
-                UpdateClanWarData(war, logEntry);
+                war.UpdateStuckWarFromWarLogEntryDto(logEntry);
                 logger.LogWarning("War {WarId} against {Opponent} was forcibly closed due to downtime, updated from war log.",
                     war.Id, war.OpponentClanName);
             }
