@@ -3,7 +3,7 @@
 public record ClanWarPlayerPerformance
 {
     public int WarId { get; set; }
-    public string? PlayerTag { get; set; }
+    public string PlayerTag { get; set; } = string.Empty;
     public short MapPosition { get; set; }
     public short TownHallLevel { get; set; }
 

@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260603125643_AddedClanWarLeaguesTables")]
+    partial class AddedClanWarLeaguesTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -292,8 +295,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(10)")
                         .UseCollation("C");
 
-                    b.Property<float>("OpponentDestructionPercentage")
-                        .HasColumnType("real");
+                    b.Property<short>("OpponentDestructionPercentage")
+                        .HasColumnType("smallint");
 
                     b.Property<short>("OpponentStars")
                         .HasColumnType("smallint");
@@ -301,8 +304,8 @@ namespace Infrastructure.Migrations
                     b.Property<short>("OurAttacks")
                         .HasColumnType("smallint");
 
-                    b.Property<float>("OurDestructionPercentage")
-                        .HasColumnType("real");
+                    b.Property<short>("OurDestructionPercentage")
+                        .HasColumnType("smallint");
 
                     b.Property<short>("OurStars")
                         .HasColumnType("smallint");
