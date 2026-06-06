@@ -35,7 +35,7 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
                 var hasChanges = await collector.UpdateClanWar(ct);
                 if (hasChanges)
                 {
-                    await collector.RefreshMaterializedViews(ct);
+                    await collector.RefreshCwMaterializedViews(ct);
                 }
             },
             "ClanWarAndViews", ct);
@@ -47,7 +47,14 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
 
         var clanLeagueWarsTask = RunTaskWithTimerAsync(
             TimeSpan.FromMinutes(1),
-            collector => collector.UpdateClanLeagueWars(ct),
+            async collector =>
+            {
+                var hasChanges = await collector.UpdateClanLeagueWars(ct);
+                if (hasChanges)
+                {
+                    await collector.RefreshCwlMaterializedViews(ct);
+                }
+            },
             "LeagueWars", ct);
 
         var cleanupStuckWarsTask = RunTaskWithTimerAsync(
