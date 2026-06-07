@@ -84,14 +84,14 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
                 {
                     LogErrorExecutingTaskTaskname(taskName, ex);
                 }
+
+                LogTaskTasknameCompleted(taskName);
             }
         }
         catch (OperationCanceledException)
         {
             LogStoppingTaskTaskName(taskName);
         }
-
-        LogTaskTasknameCompleted(taskName);
     }
 
     [LoggerMessage(LogLevel.Information, "Executing background task: {TaskName}")]
