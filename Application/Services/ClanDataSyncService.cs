@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Net;
 using Application.DTOs.Clans.ClanWarLeagues;
+using Application.DTOs.Clans.ClanWars;
 using Application.DTOs.Players;
 using Application.Extensions;
 using Application.Interfaces;
@@ -385,8 +386,20 @@ public class ClanDataSyncService(
 
             var opponentsLookup = oppSide.Members?.ToDictionary(m => m.Tag) ?? [];
 
-            foreach (var memberDto in ourSide.Members ?? [])
+            // Сортировка, чтобы получать правильные номера мест на ЛВК
+            var actualMapPlayers = (ourSide.Members ?? Enumerable.Empty<ClanWarMemberDto>())
+                .OrderBy(m => m.MapPosition)
+                .Select((member, index) => new
+                {
+                    OriginalMember = member,
+                    ActualDayMapPosition = (short)(index + 1) // Переиндексируем!
+                })
+                .ToList();
+
+            foreach (var item in actualMapPlayers)
             {
+                var memberDto = item.OriginalMember;
+
                 if (!perfLookup.TryGetValue((tag, memberDto.Tag), out var playerPerf))
                 {
                     playerPerf = new ClanWarLeaguePlayerPerformance
@@ -400,6 +413,8 @@ public class ClanDataSyncService(
                 }
 
                 playerPerf.UpdateFromClanWarMemberDto(memberDto, opponentsLookup);
+
+                playerPerf.MapPosition = item.ActualDayMapPosition;
             }
         }
     }
