@@ -90,6 +90,8 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
         {
             LogStoppingTaskTaskName(taskName);
         }
+
+        LogTaskTasknameCompleted(taskName);
     }
 
     [LoggerMessage(LogLevel.Information, "Executing background task: {TaskName}")]
@@ -100,4 +102,7 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
 
     [LoggerMessage(LogLevel.Error, "Error executing task: {TaskName}")]
     partial void LogErrorExecutingTaskTaskname(string taskName, Exception exception);
+
+    [LoggerMessage(LogLevel.Information, "Task {taskName} completed")]
+    partial void LogTaskTasknameCompleted(string taskName);
 }
