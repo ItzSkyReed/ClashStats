@@ -82,10 +82,10 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
                 }
                 catch (Exception ex)
                 {
-                    LogErrorExecutingTaskTaskname(taskName, ex);
+                    LogErrorExecutingTaskTaskName(taskName, ex);
                 }
 
-                LogTaskTasknameCompleted(taskName);
+                LogTaskTaskNameCompleted(taskName);
             }
         }
         catch (OperationCanceledException)
@@ -101,8 +101,8 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
     partial void LogStoppingTaskTaskName(string taskName);
 
     [LoggerMessage(LogLevel.Error, "Error executing task: {TaskName}")]
-    partial void LogErrorExecutingTaskTaskname(string taskName, Exception exception);
+    partial void LogErrorExecutingTaskTaskName(string taskName, Exception exception);
 
     [LoggerMessage(LogLevel.Information, "Task {taskName} completed")]
-    partial void LogTaskTasknameCompleted(string taskName);
+    partial void LogTaskTaskNameCompleted(string taskName);
 }
