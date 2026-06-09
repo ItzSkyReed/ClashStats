@@ -9,7 +9,7 @@ public record ClanWarLeagueGroupSummary
     /// </summary>
     public string Season { get; set; } = string.Empty;
 
-    public ClanWarLeagueState State { get; set; }
+    public required ClanWarLeagueGroupState State { get; set; }
     public short TeamSize { get; set; }
 
     /// <summary>

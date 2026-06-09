@@ -17,7 +17,7 @@ public class ClanWarLeagueGroupConfiguration : IEntityTypeConfiguration<ClanWarL
 
         builder.Property(x => x.State).HasConversion(
             role => role.Value,
-            value => ClanWarLeagueState.FromValue(value)
+            value => ClanWarLeagueGroupState.FromValue(value)
         ).UseCollation("C").HasMaxLength(64).IsRequired();
 
         builder.Property(x => x.TeamSize).IsRequired();

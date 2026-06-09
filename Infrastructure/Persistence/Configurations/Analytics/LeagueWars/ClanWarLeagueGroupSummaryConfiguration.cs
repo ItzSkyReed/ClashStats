@@ -16,7 +16,7 @@ public class ClanWarLeagueGroupSummaryConfiguration : IEntityTypeConfiguration<C
         builder.Property(x => x.Season);
         builder.Property(x => x.State).HasConversion(
             role => role.Value,
-            value => ClanWarLeagueState.FromValue(value)
+            value => ClanWarLeagueGroupState.FromValue(value)
         );
 
         builder.Property(x => x.TeamSize);
