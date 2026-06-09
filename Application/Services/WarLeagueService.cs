@@ -20,7 +20,7 @@ public class WarLeagueService(IClashApiClient apiClient, ILogger<WarLeagueServic
     public async Task<List<IWarLeagueService.ClanLeagueRanking>?> CalculateClanWarLeagueRankings(ClanWarLeagueGroupDto leagueGroupDto,
         CancellationToken ct)
     {
-        if (leagueGroupDto.State != ClanWarLeagueState.WarEnded)
+        if (leagueGroupDto.State != ClanWarLeagueGroupState.Ended)
             return null;
 
         var warTags = leagueGroupDto.Rounds.SelectMany(r => r.WarTags);

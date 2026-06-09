@@ -273,7 +273,7 @@ public class ClanDataSyncService(
 
         var leagueGroup = leagueResult.Data;
 
-        if (leagueGroup?.State != ClanWarLeagueState.WarEnded && leagueGroup?.State != ClanWarLeagueState.InWar)
+        if (leagueGroup?.State != ClanWarLeagueGroupState.Ended && leagueGroup?.State != ClanWarLeagueGroupState.InWar)
             return false;
 
         await SyncLeagueGroupAsync(leagueGroup, ct);
