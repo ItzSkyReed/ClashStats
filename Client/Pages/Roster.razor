@@ -1,0 +1,269 @@
+﻿@page "/roster"
+@using Client.ViewModels
+@using Domain.Models
+@inject HttpClient Http
+
+<MudTable Items="@_players"
+          Filter="FilterFunc"
+          FixedHeader="true"
+          Height="calc(100vh - 120px)"
+          Hover="true"
+          Dense="true"
+          Breakpoint="Breakpoint.Sm"
+          Elevation="1">
+
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Аналитика состава клана</MudText>
+        <MudSpacer/>
+        <MudTextField @bind-Value="_searchString"
+                      Placeholder="Поиск по нику или тегу"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      IconSize="Size.Medium"
+                      Class="mt-0"
+                      Clearable="true"/>
+    </ToolBarContent>
+
+    <ColGroup>
+        <col style="width: 50px;"/>
+        <col style="width: 250px;"/>
+        <col style="width: 80px;"/>
+        <col style="width: 100px;"/>
+        <col style="width: 120px;"/>
+        <col style="width: 120px;"/>
+        <col/>
+    </ColGroup>
+
+    <HeaderContent>
+        <MudTh></MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<FullPlayerViewModel, object>(x => x.Member.Name)">Игрок</MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<FullPlayerViewModel, object>(x => x.Member.TownHallLevel)">ТХ</MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<FullPlayerViewModel, object>(x => x.Member.WarPreference?.ToString() ?? string.Empty)">Статус КВ</MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<FullPlayerViewModel, object>(x => x.CwParticipation)">Явка КВ (%)</MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<FullPlayerViewModel, object>(x => x.CwlParticipation)">Явка ЛВК (%)</MudTableSortLabel>
+        </MudTh>
+    </HeaderContent>
+
+    <RowTemplate>
+        <MudTd>
+            <MudIconButton Icon="@(context.ShowDetails ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)"
+                           OnClick="() => context.ShowDetails = !context.ShowDetails"
+                           Size="Size.Small"/>
+        </MudTd>
+        <MudTd DataLabel="Игрок">
+            <div class="d-flex flex-column">
+                <MudText Typo="Typo.body2"><strong>@context.Member.Name</strong></MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@context.RoleName | @context.Member.Tag</MudText>
+            </div>
+        </MudTd>
+        <MudTd DataLabel="ТХ">
+            <MudChip T="short" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">@context.Member.TownHallLevel</MudChip>
+        </MudTd>
+        <MudTd DataLabel="Статус КВ">
+            <MudIcon Icon="@context.WarPreferenceIcon" Color="@context.WarPreferenceColor" Size="Size.Small"/>
+        </MudTd>
+        <MudTd DataLabel="Явка КВ">@context.CwParticipation.ToString("0.##")%</MudTd>
+        <MudTd DataLabel="Явка ЛВК">@context.CwlParticipation.ToString("0.##")%</MudTd>
+    </RowTemplate>
+
+    <ChildRowContent>
+        @if (context.ShowDetails)
+        {
+            <MudTr>
+                <td colspan="6" class="pa-4" style="background-color: var(--mud-palette-background-grey);">
+                    <MudCard Elevation="0">
+                        <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true">
+
+                            <MudTabPanel Text="Сводка профиля" Class="pa-4">
+                                <MudGrid>
+                                    <MudItem xs="12" md="4">
+                                        <MudList T="string" Dense="true">
+                                            <MudListItem T="string" Icon="@Icons.Material.Filled.TrendingUp">Трофеи: <strong>@context.Member.Trophies</strong></MudListItem>
+                                            <MudListItem T="string" Icon="@Icons.Material.Filled.Star">Звезд в КВ (всего): <strong>@context.Member.WarStars</strong></MudListItem>
+                                            <MudListItem T="string" Icon="@Icons.Material.Filled.HomeWork">Деревня строителя:
+                                                <strong>ТХ @context.Member.BuilderHallLevel (@context.Member.BuilderBaseTrophies)</strong></MudListItem>
+                                            <MudListItem T="string" Icon="@Icons.Material.Filled.MilitaryTech">Уровень: <strong>@context.Member.ExpLevel</strong></MudListItem>
+                                            <MudListItem T="string" Icon="@Icons.Material.Filled.Handshake">Вклад в Столицу: <strong>@context.Member.ClanCapitalContributions</strong>
+                                            </MudListItem>
+                                        </MudList>
+                                    </MudItem>
+                                    <MudItem xs="12" md="8">
+                                        <MudText Typo="Typo.subtitle2" Class="mb-2">Динамика доната (последние сезоны)</MudText>
+                                        @if (context.DonationHistoryValues.Length > 0)
+                                        {
+                                            <MudChart ChartType="ChartType.Line"
+                                                      ChartSeries="@context.DonationChartSeries"
+                                                      ChartLabels="@context.DonationHistoryLabels"
+                                                      Width="100%" Height="250px"/>
+                                        }
+                                        else
+                                        {
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary">Нет исторических данных по донату</MudText>
+                                        }
+                                    </MudItem>
+                                </MudGrid>
+                            </MudTabPanel>
+
+                            <MudTabPanel Text="Обычные КВ" Class="pa-4">
+                                @if (context.CwSummary is not null)
+                                {
+                                    <MudGrid>
+                                        <MudItem xs="12" md="6">
+                                            <MudList T="string" Dense="true">
+                                                <MudListItem T="string">Средний снос: <strong>@context.CwSummary.AverageDestructionPercentage.ToString("0.##")%</strong></MudListItem>
+                                                <MudListItem T="string">Звезд за атаку: <strong>@context.CwSummary.AverageStarsPerAttack.ToString("0.##")</strong></MudListItem>
+                                                <MudListItem T="string">Звезд за войну: <strong>@context.CwSummary.AverageStarsPerWar.ToString("0.##")</strong></MudListItem>
+                                                <MudListItem T="string">Дисбаланс ТХ: <strong>@context.CwSummary.AverageThMismatches.ToString("+0.##;-0.##;0")</strong></MudListItem>
+                                            </MudList>
+                                        </MudItem>
+                                        <MudItem xs="12" md="6">
+                                            <MudList T="string" Dense="true">
+                                                <MudListItem T="string">Использование 1-й атаки: <strong>@context.CwSummary.FirstAttackParticipationRate.ToString("0.##")%</strong></MudListItem>
+                                                <MudListItem T="string">Использование 2-й атаки: <strong>@context.CwSummary.SecondAttackParticipationRate.ToString("0.##")%</strong></MudListItem>
+                                                <MudListItem T="string">Атаки по зеркалу: <strong>@context.CwSummary.MirrorAttacksRate.ToString("0.##")%</strong></MudListItem>
+                                                <MudListItem T="string">3★ против своего уровня ТХ: <strong>@context.CwSummary.ThreeStarRateAgainstSameTh.ToString("0.##")%</strong></MudListItem>
+                                            </MudList>
+                                        </MudItem>
+                                        <MudItem xs="12">
+                                            <div class="px-4 d-flex align-center gap-2">
+                                                <MudText Typo="Typo.body2">История последних 5 КВ (активность атак):</MudText>
+                                                @if (context.CwSummary.RecentWarsAttacks.Count > 0)
+                                                {
+                                                    @foreach (var atk in context.CwSummary.RecentWarsAttacks)
+                                                    {
+                                                        <MudChip T="short" Size="Size.Small" Color="@GetCwAttackColor(atk)">@atk
+                                                            @(atk switch
+                                                            {
+                                                                1 => "атака",
+                                                                2 => "атаки",
+                                                                _ => "атак"
+                                                            })
+                                                        </MudChip>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Нет недавних участий</MudText>
+                                                }
+                                            </div>
+                                        </MudItem>
+                                    </MudGrid>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">Нет накопленной аналитики по КВ</MudText>
+                                }
+                            </MudTabPanel>
+
+                            <MudTabPanel Text="Лига Клановых Войн" Class="pa-4">
+                                @if (context.LatestCwlSummary is not null)
+                                {
+                                    <MudText Typo="Typo.subtitle1" Class="mb-3 px-4">Данные за актуальный сезон: <strong>@context.LatestCwlSummary.Season</strong></MudText>
+                                    <MudGrid>
+                                        <MudItem xs="12" md="6">
+                                            <MudList T="string" Dense="true">
+                                                <MudListItem T="string">Дней выставлен на карту: <strong>@context.LatestCwlSummary.TotalRoundsOnMap из 7</strong></MudListItem>
+                                                <MudListItem T="string">Средний снос: <strong>@context.LatestCwlSummary.AverageDestructionPercentage.ToString("0.##")%</strong></MudListItem>
+                                                <MudListItem T="string">Звезд за атаку: <strong>@context.LatestCwlSummary.AverageStarsPerAttack.ToString("0.##")</strong></MudListItem>
+                                            </MudList>
+                                        </MudItem>
+                                        <MudItem xs="12" md="6">
+                                            <MudList T="string" Dense="true">
+                                                <MudListItem T="string">Дисбаланс ТХ: <strong>@context.LatestCwlSummary.AverageThMismatches.ToString("+0.##;-0.##;0")</strong>
+                                                </MudListItem>
+                                                <MudListItem T="string">Атаки по зеркалу: <strong>@context.LatestCwlSummary.MirrorAttacksRate.ToString("0.##")%</strong></MudListItem>
+                                                <MudListItem T="string">3★ против своего уровня ТХ: <strong>@context.LatestCwlSummary.ThreeStarRateAgainstSameTh.ToString("0.##")%</strong>
+                                                </MudListItem>
+                                            </MudList>
+                                        </MudItem>
+                                        <MudItem xs="12">
+                                            <div class="px-4 d-flex align-center gap-1">
+                                                <MudText Typo="Typo.body2" Class="mr-2">Результаты раундов недели ЛВК:</MudText>
+                                                @if (context.LatestCwlSummary.CwlRoundsAttacks.Count > 0)
+                                                {
+                                                    @foreach (var round in context.LatestCwlSummary.CwlRoundsAttacks)
+                                                    {
+                                                        <MudAvatar Size="Size.Small" Color="@GetCwlRoundColor(round)" Style="width: 24px; height: 24px; font-size: 0.75rem;">
+                                                            @GetCwlRoundText(round)
+                                                        </MudAvatar>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">История раундов пуста</MudText>
+                                                }
+                                            </div>
+                                        </MudItem>
+                                    </MudGrid>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">Игрок не принимал участие в ЛВК</MudText>
+                                }
+                            </MudTabPanel>
+
+                        </MudTabs>
+                    </MudCard>
+                </td>
+            </MudTr>
+        }
+    </ChildRowContent>
+</MudTable>
+
+@code {
+    private string _searchString = "";
+    private List<FullPlayerViewModel> _players = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var members = await Http.GetFromJsonAsync<List<ClanMember>>("/api/v1/summaries/players") ?? [];
+
+        _players = members
+            .Select(m => new FullPlayerViewModel(m))
+            .OrderByDescending(p => p.Member.TownHallLevel)
+            .ThenByDescending(p => p.CurrentSeasonDonations)
+            .ToList();
+    }
+
+    private bool FilterFunc(FullPlayerViewModel player)
+    {
+        if (string.IsNullOrWhiteSpace(_searchString)) return true;
+
+        return player.Member.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase)
+               || player.Member.Tag.Contains(_searchString, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static Color GetCwAttackColor(short attacks) => attacks switch
+    {
+        2 => Color.Success,
+        1 => Color.Warning,
+        0 => Color.Error,
+        _ => Color.Default
+    };
+
+    private static Color GetCwlRoundColor(short result) => result switch
+    {
+        3 => Color.Success,
+        2 or 1 => Color.Warning,
+        0 => Color.Error, // Проспал атаку
+        -1 => Color.Info, // Сидел на замене
+        _ => Color.Surface // Не был в заявке/клане
+    };
+
+    private static string GetCwlRoundText(short result) => result switch
+    {
+        >= 0 => result.ToString(),
+        -1 => "Z", // Замена
+        _ => "-" // Не участвовал
+    };
+
+}

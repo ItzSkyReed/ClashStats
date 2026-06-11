@@ -29,6 +29,19 @@ public static class SummaryEndpoints
             .WithSummary("Получить статистику игроков в КВ")
             .WithDescription("Возвращает накопленную за всё время статистику игроков в обычных клановых войнах.");
 
+        group.MapGet("/players", async (IAppDbContext dbContext) =>
+            {
+                var playerSummaries = await dbContext.ClanMembers.AsNoTracking()
+                    .Include(member => member.SeasonStats)
+                    .Include(member => member.ClanWarPlayerSummary)
+                    .Include(member => member.ClanWarLeaguesPlayerSummaries)
+                    .AsSplitQuery().ToListAsync();
+                return TypedResults.Ok(playerSummaries);
+            })
+            .WithName("get_player_summaries")
+            .WithSummary("Получить полную статистику игрока")
+            .WithDescription("Возвращает накопленную за всё время статистику игрока");
+
         group.MapGet("/cwl/players", async Task<IResult> (
                 [Description("Сезон в формате ГГГГ-ММ (например, 2026-05). Необязательный.")]
                 string? season,

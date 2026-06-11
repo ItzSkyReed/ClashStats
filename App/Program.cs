@@ -58,7 +58,12 @@ public class Program
 
         await ApplyMigrations(app.Services);
 
+        app.UseBlazorFrameworkFiles();
+        app.UseStaticFiles();
+
         app.MapEndpoints();
+
+        app.MapFallbackToFile("index.html");
 
         await app.RunAsync();
     }
