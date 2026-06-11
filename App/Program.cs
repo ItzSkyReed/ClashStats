@@ -125,6 +125,7 @@ public class Program
         builder.Services.AddScoped<IClashApiClient, ClashApiClient>();
         builder.Services.AddScoped<IClanDataSyncService, ClanDataSyncService>();
         builder.Services.AddScoped<IWarLeagueService, WarLeagueService>();
+        builder.Services.AddScoped<IPlayerActivityService, PlayerActivityService>();
 
         builder.Services.AddHostedService<StatsUpdateWorker>();
 

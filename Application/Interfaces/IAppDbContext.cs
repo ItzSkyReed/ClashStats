@@ -16,6 +16,8 @@ public interface IAppDbContext
     public DbSet<ClanWarLeagueGroup> ClanWarLeagueGroups { get; set; }
     public DbSet<ClanWarLeagueWar> ClanWarLeagueWars { get; set; }
     public DbSet<ClanWarLeaguePlayerPerformance> ClanWarLeaguePlayerPerformances { get; set; }
+    public DbSet<PlayerActivitySnapshot> PlayerActivitySnapshots { get; set; }
+    public DbSet<PlayerActivityState> PlayerActivityStates { get; set; }
 
     public DbSet<ClanWarSummary> ClanWarSummaries { get; set; }
     public DbSet<ClanWarPlayerSummary> ClanWarPlayerSummaries { get; set; }

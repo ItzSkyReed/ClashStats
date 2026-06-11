@@ -28,6 +28,11 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
             collector => collector.UpdateClanMembers(ct),
             "ClanMembers", ct);
 
+        var playerActivityTask = RunTaskWithTimerAsync(
+            TimeSpan.FromMinutes(10),
+            collector => collector.UpdateActivitySnapshots(ct),
+            "PlayerActivity", ct);
+
         var clanWarTask = RunTaskWithTimerAsync(
             TimeSpan.FromMinutes(1),
             async collector =>
@@ -55,14 +60,14 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
                     await collector.RefreshCwlMaterializedViews(ct);
                 }
             },
-            "LeagueWars", ct);
+            "LeagueWarsAndViews", ct);
 
         var cleanupStuckWarsTask = RunTaskWithTimerAsync(
             TimeSpan.FromMinutes(10),
             collector => collector.CleanupStuckWars(ct),
             "StuckWars", ct);
 
-        await Task.WhenAll(clanMembersTask, seasonStatsTask, clanWarTask, cleanupStuckWarsTask, clanLeagueWarsTask);
+        await Task.WhenAll(clanMembersTask, seasonStatsTask, clanWarTask, cleanupStuckWarsTask, clanLeagueWarsTask, playerActivityTask);
     }
 
     private async Task RunTaskWithTimerAsync(TimeSpan period, Func<IClanDataSyncService, Task> action, string taskName, CancellationToken ct)

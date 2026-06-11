@@ -9,6 +9,8 @@ namespace Domain.Models;
 public record ClanMember
 {
     public required string Tag { get; set; }
+    public int InternalId { get; set; }
+
     public required string Name { get; set; }
     public short TownHallLevel { get; set; }
     public short BuilderHallLevel { get; set; }
@@ -32,5 +34,7 @@ public record ClanMember
     public ICollection<ClanWarPlayerPerformance>? ClanWarPerformances { get; set; } = new List<ClanWarPlayerPerformance>();
     public ICollection<ClanWarLeaguePlayerPerformance>? ClanWarLeaguePerformances { get; set; } = new List<ClanWarLeaguePlayerPerformance>();
     public ICollection<ClanWarLeaguesPlayerSummary>? ClanWarLeaguesPlayerSummaries { get; set; } = new List<ClanWarLeaguesPlayerSummary>();
-    public ClanWarPlayerSummary? ClanWarPlayerSummary { get; set; } = null;
+    public ClanWarPlayerSummary? ClanWarPlayerSummary { get; set; }
+    public ICollection<PlayerActivitySnapshot>? ActivitySnapshots { get; set; } = new List<PlayerActivitySnapshot>();
+    public PlayerActivityState? ActivityState { get; set; }
 }

@@ -17,6 +17,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ClanWar> ClanWars { get; set; }
     public DbSet<ClanWarPlayerPerformance> ClanWarPlayerPerformances { get; set; }
     public DbSet<SeasonStats> SeasonStats { get; set; }
+    public DbSet<PlayerActivitySnapshot> PlayerActivitySnapshots { get; set; }
+    public DbSet<PlayerActivityState> PlayerActivityStates { get; set; }
 
     public DbSet<ClanWarSummary> ClanWarSummaries { get; set; }
     public DbSet<ClanWarPlayerSummary> ClanWarPlayerSummaries { get; set; }

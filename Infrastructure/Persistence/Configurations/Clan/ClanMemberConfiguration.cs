@@ -12,6 +12,12 @@ public class ClanMemberConfiguration : IEntityTypeConfiguration<ClanMember>
         builder.ToTable("clan_members");
 
         builder.HasKey(x => x.Tag);
+
+        builder.Property(x => x.InternalId)
+            .ValueGeneratedOnAdd();
+
+        builder.HasAlternateKey(x => x.InternalId); // Делаем его альтернативным ключом
+
         builder.Property(x => x.Tag).HasMaxLength(10).UseCollation("C").IsRequired();
         builder.Property(x => x.Name).HasMaxLength(64).IsRequired();
         builder.Property(x => x.TownHallLevel).IsRequired();
@@ -21,10 +27,12 @@ public class ClanMemberConfiguration : IEntityTypeConfiguration<ClanMember>
         builder.Property(x => x.WarStars).IsRequired();
         builder.Property(x => x.BuilderBaseTrophies).IsRequired();
         builder.Property(x => x.BestBuilderBaseTrophies).IsRequired();
+
         builder.Property(x => x.Role).HasConversion(
             role => role!.Value,
             value => ClanRole.FromValue(value)
         ).UseCollation("C").HasMaxLength(64).IsRequired();
+
         builder.Property(x => x.WarPreference).HasConversion(
             preference => preference!.Value,
             value => WarPreference.FromValue(value)

@@ -16,12 +16,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
 
-public class ClanDataSyncService(
+public partial class ClanDataSyncService(
     IAppDbContext dbContext,
     IClashApiClient apiClient,
     [FromKeyedServices("ClanTag")] string clanTag,
     ILogger<ClanDataSyncService> logger,
-    IWarLeagueService warLeagueService) : IClanDataSyncService
+    IWarLeagueService warLeagueService,
+    IPlayerActivityService playerActivityService) : IClanDataSyncService
 {
     public async Task UpdateClanMembers(CancellationToken ct)
     {
@@ -290,6 +291,65 @@ public class ClanDataSyncService(
         return savedRows > 0;
     }
 
+    public async Task UpdateActivitySnapshots(CancellationToken ct)
+    {
+        var currentClanMembers = await dbContext.ClanMembers
+            .Select(x => new { x.Tag, x.InternalId })
+            .ToListAsync(ct);
+
+        var playerResults = new ConcurrentBag<(int internalId, PlayerDto Result)>();
+        await Parallel.ForEachAsync(currentClanMembers, ct, async (member, _) =>
+        {
+            var result = await apiClient.GetPlayerAsync(member.Tag, ct).UnwrapOrLogAsync(logger);
+            if (result is not null)
+                playerResults.Add((member.InternalId, result));
+        });
+
+        var memberIds = currentClanMembers.Select(x => x.InternalId).ToList();
+        var stateDict = await dbContext.PlayerActivityStates
+            .Where(x => memberIds.Contains(x.MemberInternalId))
+            .ToDictionaryAsync(x => x.MemberInternalId, x => x, ct);
+
+        var lastKnownScores = stateDict.ToDictionary(
+            x => x.Key,
+            x => x.Value.ActivityScore);
+
+        var updates = playerActivityService.DetermineActivityUpdates(playerResults, lastKnownScores);
+
+        if (updates.Count == 0) return;
+
+        var now = DateTimeOffset.UtcNow;
+        var snapshotsToInsert = new List<PlayerActivitySnapshot>();
+
+        foreach (var (internalId, newScore) in updates)
+        {
+            if (stateDict.TryGetValue(internalId, out var state))
+            {
+                state.ActivityScore = newScore;
+            }
+            else
+            {
+                dbContext.PlayerActivityStates.Add(new PlayerActivityState
+                {
+                    MemberInternalId = internalId,
+                    ActivityScore = newScore
+                });
+            }
+
+            snapshotsToInsert.Add(new PlayerActivitySnapshot
+            {
+                MemberInternalId = internalId,
+                SnapshotTime = now
+            });
+        }
+
+        dbContext.PlayerActivitySnapshots.AddRange(snapshotsToInsert);
+
+        await dbContext.SaveChangesAsync(ct);
+
+        LogAddedCountNewActivitySnapshots(snapshotsToInsert.Count);
+    }
+
     private async Task SyncLeagueGroupAsync(ClanWarLeagueGroupDto leagueGroup, CancellationToken ct)
     {
         var groupEntity = await dbContext.ClanWarLeagueGroups
@@ -418,4 +478,7 @@ public class ClanDataSyncService(
             }
         }
     }
+
+    [LoggerMessage(LogLevel.Information, "Added {Count} new activity snapshots")]
+    partial void LogAddedCountNewActivitySnapshots(int count);
 }

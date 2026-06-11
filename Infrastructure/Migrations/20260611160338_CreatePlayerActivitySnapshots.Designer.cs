@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260611160338_CreatePlayerActivitySnapshots")]
+    partial class CreatePlayerActivitySnapshots
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -273,9 +276,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(10)")
                         .UseCollation("C");
 
-                    b.Property<int?>("ActivityStateMemberInternalId")
-                        .HasColumnType("integer");
-
                     b.Property<short>("BestBuilderBaseTrophies")
                         .HasColumnType("smallint");
 
@@ -326,8 +326,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Tag");
-
-                    b.HasIndex("ActivityStateMemberInternalId");
 
                     b.ToTable("clan_members", (string)null);
                 });
@@ -602,6 +600,9 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("ActivityScore")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("MemberInternalId")
                         .HasColumnType("integer");
 
@@ -614,19 +615,6 @@ namespace Infrastructure.Migrations
                         .IsDescending(false, true);
 
                     b.ToTable("player_activity_snapshots", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Models.PlayerActivityState", b =>
-                {
-                    b.Property<int>("MemberInternalId")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("ActivityScore")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("MemberInternalId");
-
-                    b.ToTable("player_activity_states", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.SeasonStats", b =>
@@ -670,15 +658,6 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ClanMember");
-                });
-
-            modelBuilder.Entity("Domain.Models.ClanMember", b =>
-                {
-                    b.HasOne("Domain.Models.PlayerActivityState", "ActivityState")
-                        .WithMany()
-                        .HasForeignKey("ActivityStateMemberInternalId");
-
-                    b.Navigation("ActivityState");
                 });
 
             modelBuilder.Entity("Domain.Models.ClanWarLeagues.ClanWarLeaguePlayerPerformance", b =>
@@ -736,18 +715,6 @@ namespace Infrastructure.Migrations
                         .WithMany("ActivitySnapshots")
                         .HasForeignKey("MemberInternalId")
                         .HasPrincipalKey("InternalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Member");
-                });
-
-            modelBuilder.Entity("Domain.Models.PlayerActivityState", b =>
-                {
-                    b.HasOne("Domain.Models.ClanMember", "Member")
-                        .WithOne()
-                        .HasForeignKey("Domain.Models.PlayerActivityState", "MemberInternalId")
-                        .HasPrincipalKey("Domain.Models.ClanMember", "InternalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
