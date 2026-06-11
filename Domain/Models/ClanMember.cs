@@ -1,4 +1,6 @@
 ﻿using Domain.Constants;
+using Domain.Models.Analytics.ClanWarLeagues;
+using Domain.Models.Analytics.ClanWars;
 using Domain.Models.ClanWarLeagues;
 using Domain.Models.ClanWars;
 
@@ -29,4 +31,6 @@ public record ClanMember
 
     public ICollection<ClanWarPlayerPerformance>? ClanWarPerformances { get; set; } = new List<ClanWarPlayerPerformance>();
     public ICollection<ClanWarLeaguePlayerPerformance>? ClanWarLeaguePerformances { get; set; } = new List<ClanWarLeaguePlayerPerformance>();
+    public ICollection<ClanWarLeaguesPlayerSummary>? ClanWarLeaguesPlayerSummaries { get; set; } = new List<ClanWarLeaguesPlayerSummary>();
+    public ClanWarPlayerSummary? ClanWarPlayerSummary { get; set; } = null;
 }

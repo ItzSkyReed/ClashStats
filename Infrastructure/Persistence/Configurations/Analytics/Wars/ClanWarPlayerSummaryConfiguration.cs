@@ -11,6 +11,7 @@ public class ClanWarPlayerSummaryConfiguration : IEntityTypeConfiguration<ClanWa
         builder.ToView("mv_clan_war_player_summaries");
 
         builder.HasKey(x => x.Tag);
+
         builder.Property(x => x.Tag);
         builder.Property(x => x.Name);
         builder.Property(x => x.AverageMapPosition);
@@ -27,5 +28,10 @@ public class ClanWarPlayerSummaryConfiguration : IEntityTypeConfiguration<ClanWa
         builder.Property(x => x.ThreeStarRateAgainstSameTh);
         builder.Property(x => x.AverageThMismatches);
         builder.Property(x => x.RecentWarsAttacks).HasColumnType("smallint[]");
+
+
+        builder.HasOne(x => x.ClanMember)
+            .WithOne(x => x.ClanWarPlayerSummary)
+            .HasForeignKey<ClanWarPlayerSummary>(x => x.Tag);
     }
 }
