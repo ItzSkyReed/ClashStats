@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using Application.DTOs.Common;
+﻿using Application.DTOs.Common;
 using Application.DTOs.Leagues;
 using Domain.Constants;
 
@@ -28,8 +27,8 @@ public record PlayerDto
     public required BuilderBaseLeagueDto BuilderBaseLeague { get; init; }
 
     public PlayerClanDto? Clan { get; init; }
-    public required ClanRole Role { get; init; }
-    public required WarPreference WarPreference { get; init; }
+    public ClanRole? Role { get; init; }
+    public WarPreference? WarPreference { get; init; }
 
     public required int AttackWins { get; init; }
     public required int DefenseWins { get; init; }
