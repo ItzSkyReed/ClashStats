@@ -1,4 +1,5 @@
-﻿using Domain.Constants;
+﻿using System.Text.Json.Serialization;
+using Domain.Constants;
 
 namespace Domain.Models.ClanWarLeagues;
 
@@ -23,6 +24,7 @@ public record ClanWarLeagueWar
     public short OurStars { get; set; }
     public float OurDestructionPercentage { get; set; }
 
-    public List<ClanWarLeaguePlayerPerformance>? PlayerPerformances { get; set; }
-    public ClanWarLeagueGroup? Group { get; set; }
+    [JsonIgnore] public List<ClanWarLeaguePlayerPerformance>? PlayerPerformances { get; set; }
+
+    [JsonIgnore] public ClanWarLeagueGroup? Group { get; set; }
 }

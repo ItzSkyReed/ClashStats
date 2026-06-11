@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.ClanWars;
+﻿using System.Text.Json.Serialization;
+
+namespace Domain.Models.ClanWars;
 
 public record ClanWarPlayerPerformance
 {
@@ -22,5 +24,6 @@ public record ClanWarPlayerPerformance
     public short? Opponent2TownHallLevel { get; set; }
 
     public ClanWar? War { get; set; }
-    public ClanMember? Member { get; set; }
+
+    [JsonIgnore] public ClanMember? Member { get; set; }
 }

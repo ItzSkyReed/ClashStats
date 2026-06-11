@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.Analytics.ClanWarLeagues;
+﻿using System.Text.Json.Serialization;
+
+namespace Domain.Models.Analytics.ClanWarLeagues;
 
 public record ClanWarLeaguesPlayerSummary
 {
@@ -57,4 +59,6 @@ public record ClanWarLeaguesPlayerSummary
     /// </summary>
     /// <example> На фронте рисуется красивой строкой из 7 цветных кружков: [3, 2, -1, -1, 3, 0, 1] </example>
     public IReadOnlyList<short> CwlRoundsAttacks { get; set; } = [];
+
+    [JsonIgnore] public ClanMember? ClanMember { get; set; }
 }

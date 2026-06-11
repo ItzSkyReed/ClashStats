@@ -1,4 +1,6 @@
-﻿namespace Domain.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace Domain.Models;
 
 public record SeasonStats
 {
@@ -7,5 +9,5 @@ public record SeasonStats
     public int Donations { get; set; }
     public int DonationsReceived { get; set; }
 
-    public ClanMember? Player { get; set; }
+    [JsonIgnore] public ClanMember? Player { get; set; }
 }

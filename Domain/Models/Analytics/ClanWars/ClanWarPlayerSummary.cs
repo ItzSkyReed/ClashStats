@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.Analytics.ClanWars;
+﻿using System.Text.Json.Serialization;
+
+namespace Domain.Models.Analytics.ClanWars;
 
 public record ClanWarPlayerSummary
 {
@@ -71,4 +73,6 @@ public record ClanWarPlayerSummary
     /// История последних 5 КВ (количество атак: 0, 1 или 2).
     /// </summary>
     public IReadOnlyList<short> RecentWarsAttacks { get; set; } = [];
+
+    [JsonIgnore] public ClanMember? ClanMember { get; set; }
 }
