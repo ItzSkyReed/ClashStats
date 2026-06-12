@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
-using Application.DTOs.Clans.ClanWarLeagues;
-using Application.DTOs.Clans.ClanWars;
+using Application.ClashOfClansModels.Clans.ClanWarLeagues;
+using Application.ClashOfClansModels.Clans.ClanWars;
 using Application.Extensions;
 using Application.Interfaces;
 using Domain.Constants;

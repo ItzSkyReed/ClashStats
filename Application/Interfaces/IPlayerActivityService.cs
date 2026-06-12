@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Players;
+﻿using Application.ClashOfClansModels.Players;
 
 namespace Application.Interfaces;
 

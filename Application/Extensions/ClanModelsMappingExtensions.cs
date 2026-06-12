@@ -1,6 +1,6 @@
-﻿using Application.DTOs.Clans.ClanWarLeagues;
-using Application.DTOs.Clans.ClanWars;
-using Application.DTOs.Players;
+﻿using Application.ClashOfClansModels.Clans.ClanWarLeagues;
+using Application.ClashOfClansModels.Clans.ClanWars;
+using Application.ClashOfClansModels.Players;
 using Domain.Constants;
 using Domain.Models;
 using Domain.Models.ClanWarLeagues;

@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Application.DTOs.Common;
+using Application.ClashOfClansModels.Common;
 
 namespace Application.Interfaces;
 

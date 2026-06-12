@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Clans.ClanWarLeagues;
+﻿using Application.ClashOfClansModels.Clans.ClanWarLeagues;
 
 namespace Application.Interfaces;
 

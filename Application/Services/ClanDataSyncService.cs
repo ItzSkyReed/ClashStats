@@ -1,9 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using System.Globalization;
 using System.Net;
-using Application.DTOs.Clans.ClanWarLeagues;
-using Application.DTOs.Clans.ClanWars;
-using Application.DTOs.Players;
+using Application.ClashOfClansModels.Clans.ClanWarLeagues;
+using Application.ClashOfClansModels.Clans.ClanWars;
+using Application.ClashOfClansModels.Players;
 using Application.Extensions;
 using Application.Interfaces;
 using Domain.Constants;

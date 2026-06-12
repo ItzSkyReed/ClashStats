@@ -1,12 +1,12 @@
-﻿using Application.DTOs.Clans;
-using Application.DTOs.Clans.BuilderBase;
-using Application.DTOs.Clans.Capital;
-using Application.DTOs.Clans.ClanWarLeagues;
-using Application.DTOs.Clans.ClanWars;
-using Application.DTOs.Common;
-using Application.DTOs.Leagues;
-using Application.DTOs.Locations;
-using Application.DTOs.Players;
+﻿using Application.ClashOfClansModels.Clans;
+using Application.ClashOfClansModels.Clans.BuilderBase;
+using Application.ClashOfClansModels.Clans.Capital;
+using Application.ClashOfClansModels.Clans.ClanWarLeagues;
+using Application.ClashOfClansModels.Clans.ClanWars;
+using Application.ClashOfClansModels.Common;
+using Application.ClashOfClansModels.Leagues;
+using Application.ClashOfClansModels.Locations;
+using Application.ClashOfClansModels.Players;
 using Domain.Constants;
 
 namespace Application.Interfaces;
