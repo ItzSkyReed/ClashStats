@@ -1,11 +1,12 @@
-﻿using Application.Interfaces;
+﻿using System.Collections;
+using Application.Interfaces;
 
-namespace Infrastructure.Api;
+namespace Infrastructure.Api.ClashOfClans.ApiClient;
 
 /// <summary>
 /// Клиент для взаимодействия с API Clash of Clans.
 /// </summary>
-public  partial class ClashApiClient: IClashApiClient
+public partial class ClashApiClient : IClashApiClient
 {
     private readonly ClashApiRequestExecutor _executor;
 
@@ -34,7 +35,7 @@ public  partial class ClashApiClient: IClashApiClient
                     queryParams[key] = str;
                 return;
             }
-            case System.Collections.IEnumerable enumerable:
+            case IEnumerable enumerable:
             {
                 var items = enumerable.Cast<object>()
                     .Select(x => x.ToString())

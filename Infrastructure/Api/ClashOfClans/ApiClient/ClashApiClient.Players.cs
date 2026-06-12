@@ -2,7 +2,7 @@
 using Application.ClashOfClansModels.Players;
 using Application.Interfaces;
 
-namespace Infrastructure.Api;
+namespace Infrastructure.Api.ClashOfClans.ApiClient;
 
 public partial class ClashApiClient
 {

@@ -6,7 +6,7 @@ using Application.Interfaces;
 using Domain.Constants;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace Infrastructure.Api;
+namespace Infrastructure.Api.ClashOfClans.ApiClient;
 
 public partial class ClashApiClient
 {

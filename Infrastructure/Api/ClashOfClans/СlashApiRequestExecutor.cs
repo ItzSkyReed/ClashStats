@@ -3,7 +3,7 @@ using System.Text.Json;
 using Application.ClashOfClansModels.Common;
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Api;
+namespace Infrastructure.Api.ClashOfClans;
 
 public class ClashApiRequestExecutor(HttpClient client, IOptions<JsonSerializerOptions> options)
 {

@@ -2,7 +2,7 @@
 using Application.ClashOfClansModels.Common;
 using Application.Interfaces;
 
-namespace Infrastructure.Api;
+namespace Infrastructure.Api.ClashOfClans;
 
 public record ApiResult<T>(T? Data, ClientErrorDto? Error, HttpStatusCode StatusCode) : IApiResult<T>
 {
