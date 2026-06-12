@@ -1,1 +1,1 @@
-﻿Infrastructure/Migrations/Scripts/*.sql linguist-language=PLpgSQL
+﻿.sql linguist-detectable=true
