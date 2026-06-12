@@ -10,11 +10,11 @@ using Infrastructure.Api.ClashOfClans.ApiClient;
 using Infrastructure.Api.Converters;
 using Infrastructure.Middlewares;
 using Infrastructure.Persistence;
-using Infrastructure.Swagger;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.OpenApi;
 using Polly;
+using Shared.DTOs.Summaries;
 
 namespace App;
 
@@ -30,16 +30,25 @@ public class Program
 
         builder.Services.AddEndpointsApiExplorer();
 
-        builder.Services.AddSwaggerGen(c =>
+        builder.Services.AddSwaggerGen(options =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo
+            options.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "Russian Winners Stats API",
                 Version = "v1"
             });
 
-            c.SupportNonNullableReferenceTypes();
-            c.SchemaFilter<SmartEnumSchemaFilter>();
+            options.SupportNonNullableReferenceTypes();
+
+            var basePath = AppContext.BaseDirectory;
+
+            var sharedXmlFilename = $"{typeof(ClanWarSummaryDto).Assembly.GetName().Name}.xml";
+            var sharedXmlPath = Path.Combine(basePath, sharedXmlFilename);
+
+            if (File.Exists(sharedXmlPath))
+            {
+                options.IncludeXmlComments(sharedXmlPath);
+            }
         });
 
         var app = builder.Build();
