@@ -10,39 +10,49 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_player_activity_snapshots_clan_members_ClanMemberTag",
-                table: "player_activity_snapshots");
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN 
+                    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'player_activity_snapshots') THEN
+                        
+                        ALTER TABLE player_activity_snapshots 
+                        DROP CONSTRAINT IF EXISTS ""FK_player_activity_snapshots_clan_members_ClanMemberTag"";
 
-            migrationBuilder.DropIndex(
-                name: "IX_player_activity_snapshots_ClanMemberTag",
-                table: "player_activity_snapshots");
 
-            migrationBuilder.DropColumn(
-                name: "ClanMemberTag",
-                table: "player_activity_snapshots");
+                        DROP INDEX IF EXISTS ""IX_player_activity_snapshots_ClanMemberTag"";
+                        ALTER TABLE player_activity_snapshots 
+                        DROP COLUMN IF EXISTS ""ClanMemberTag"";
+
+                    END IF;
+                END $$;
+            ");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "ClanMemberTag",
-                table: "player_activity_snapshots",
-                type: "character varying(10)",
-                nullable: true);
+            migrationBuilder.Sql(@"
+            DO $$ 
+            BEGIN 
+                IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'player_activity_snapshots') THEN
+                    
+                    IF NOT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'player_activity_snapshots' AND column_name = 'ClanMemberTag') THEN
+                        ALTER TABLE player_activity_snapshots ADD COLUMN ""ClanMemberTag"" character varying(10) NULL;
+                    END IF;
 
-            migrationBuilder.CreateIndex(
-                name: "IX_player_activity_snapshots_ClanMemberTag",
-                table: "player_activity_snapshots",
-                column: "ClanMemberTag");
+                    IF NOT EXISTS (SELECT FROM pg_indexes WHERE tablename = 'player_activity_snapshots' AND indexname = 'IX_player_activity_snapshots_ClanMemberTag') THEN
+                        CREATE INDEX ""IX_player_activity_snapshots_ClanMemberTag"" ON player_activity_snapshots (""ClanMemberTag"");
+                    END IF;
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_player_activity_snapshots_clan_members_ClanMemberTag",
-                table: "player_activity_snapshots",
-                column: "ClanMemberTag",
-                principalTable: "clan_members",
-                principalColumn: "Tag");
+                    IF NOT EXISTS (SELECT FROM information_schema.table_constraints WHERE constraint_name = 'FK_player_activity_snapshots_clan_members_ClanMemberTag') THEN
+                        ALTER TABLE player_activity_snapshots 
+                        ADD CONSTRAINT ""FK_player_activity_snapshots_clan_members_ClanMemberTag"" 
+                        FOREIGN KEY (""ClanMemberTag"") REFERENCES clan_members (""Tag"");
+                    END IF;
+
+                END IF;
+            END $$;
+        ");
         }
     }
 }
