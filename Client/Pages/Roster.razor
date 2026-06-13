@@ -42,7 +42,7 @@
             <MudTableSortLabel SortBy="new Func<FullPlayerViewModel, object>(x => x.Member.TownHallLevel)">ТХ</MudTableSortLabel>
         </MudTh>
         <MudTh>
-            <MudTableSortLabel SortBy="new Func<FullPlayerViewModel, object>(x => x.Member.WarPreference?.ToString() ?? string.Empty)">Статус КВ</MudTableSortLabel>
+            <MudTableSortLabel SortBy="new Func<FullPlayerViewModel, object>(x => x.Member.WarPreference.ToString())">Статус КВ</MudTableSortLabel>
         </MudTh>
         <MudTh>
             <MudTableSortLabel SortBy="new Func<FullPlayerViewModel, object>(x => x.CwParticipation)">Явка КВ (%)</MudTableSortLabel>

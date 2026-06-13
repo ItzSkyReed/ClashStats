@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using Client.ViewModels;
-using Domain.Models;
 using Microsoft.AspNetCore.Components;
+using Shared.DTOs.Summaries;
 
 namespace Client.Pages;
 
@@ -14,7 +14,7 @@ public partial class Roster
 
     protected override async Task OnInitializedAsync()
     {
-        var members = await Http.GetFromJsonAsync<List<ClanMember>>("/api/v1/summaries/players") ?? [];
+        var members = await Http.GetFromJsonAsync<List<ClanMemberSummaryDto>>("api/v1/players/summary") ?? [];
 
         _players = members
             .Select(m => new FullPlayerViewModel(m))
@@ -28,10 +28,11 @@ public partial class Roster
     {
         return roleName switch
         {
-            "Admin" => "Старейшина",
-            "Member" => "Участник",
-            "CoLeader" => "Соруководитель",
-            "Leader" => "Глава",
+            "admin" => "Старейшина",
+            "member" => "Участник",
+            "coLeader" => "Соруководитель",
+            "leader" => "Глава",
+            "notMember" => "Не в клане (я тоже не знаю как так)",
             _ => "Роль: Н/Д"
         };
     }

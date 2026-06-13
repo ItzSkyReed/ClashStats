@@ -1,6 +1,5 @@
-﻿@using Client.ViewModels
-<MudCard Elevation="0">
-    <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true">
+﻿<MudCard Elevation="0">
+    <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" ActivePanelIndexChanged="OnTabChanged">
 
         <MudTabPanel Text="Сводка профиля" Class="pa-4">
             <MudGrid>
@@ -152,34 +151,37 @@
             }
         </MudTabPanel>
 
+        <MudTabPanel Text="Активность" Class="pa-4">
+            @if (_isLoadingActivity)
+            {
+                <div class="d-flex flex-column align-center justify-center" style="height: 300px;">
+                    <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large"/>
+                    <MudText Typo="Typo.body2" Class="mt-3" Color="Color.Secondary">Загрузка данных активности...</MudText>
+                </div>
+            }
+            else if (_activitySeries.Any())
+            {
+                <MudText Typo="Typo.subtitle1" Class="mb-4" Align="Align.Center">
+                    @_activitySubtitle
+                </MudText>
+
+                <div style="width: 100%; overflow-x: auto; padding-bottom: 8px;">
+                    <div style="min-width: 1000px;">
+                        <MudChart ChartType="ChartType.Line"
+                                  ChartSeries="@_activitySeries"
+                                  ChartLabels="@_activityLabels"
+                                  Width="100%"
+                                  Height="300px"/>
+                    </div>
+                </div>
+            }
+            else if (_activityLoaded)
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-2 mx-auto" Style="max-width: 400px;">
+                    Нет данных об активности за выбранный период.
+                </MudAlert>
+            }
+        </MudTabPanel>
+
     </MudTabs>
 </MudCard>
-
-@code {
-    [Parameter] public FullPlayerViewModel Player { get; set; } = default!;
-
-    private static Color GetCwAttackColor(short attacks) => attacks switch
-    {
-        2 => Color.Success,
-        1 => Color.Warning,
-        0 => Color.Error,
-        _ => Color.Default
-    };
-
-    private static Color GetCwlRoundColor(short result) => result switch
-    {
-        3 => Color.Success,
-        2 or 1 => Color.Warning,
-        0 => Color.Error,
-        -1 => Color.Info,
-        _ => Color.Surface
-    };
-
-    private static string GetCwlRoundText(short result) => result switch
-    {
-        >= 0 => result.ToString(),
-        -1 => "Z",
-        _ => "-"
-    };
-
-}

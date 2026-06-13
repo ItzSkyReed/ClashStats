@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Application.Mappings;
 using Microsoft.EntityFrameworkCore;
+using Shared.DTOs.Statistics;
 using Shared.DTOs.Summaries;
 
 namespace App.Endpoints;
@@ -10,30 +11,29 @@ public static class SummaryEndpoints
 {
     public static void MapEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/v1/summaries")
-            .WithTags("Аналитическая сводка");
+        var versionedGroup = app.MapGroup("api/v1");
 
-        group.MapGet("/cw/wars", async (IAppDbContext dbContext) =>
+        versionedGroup.MapGet("/cw/wars/summary", async (IAppDbContext dbContext) =>
             {
                 var summaries = await dbContext.ClanWarSummaries.ProjectToDto().ToListAsync();
-                return TypedResults.Ok(summaries);
+                return Results.Ok(summaries);
             })
             .WithName("get_clan_war_summaries")
             .WithSummary("Получить общую статистику по войнам")
             .WithDescription("Возвращает агрегированную статистику по каждой прошедшей обычной войне.")
             .Produces<List<ClanWarSummaryDto>>();
 
-        group.MapGet("/cw/players", async (IAppDbContext dbContext) =>
+        versionedGroup.MapGet("/cw/players/summary", async (IAppDbContext dbContext) =>
             {
                 var playerSummaries = await dbContext.ClanWarPlayerSummaries.ProjectToDto().ToListAsync();
-                return TypedResults.Ok(playerSummaries);
+                return Results.Ok(playerSummaries);
             })
             .WithName("get_clan_war_player_summaries")
             .WithSummary("Получить статистику игроков в КВ")
             .WithDescription("Возвращает накопленную за всё время статистику игроков в обычных клановых войнах.")
             .Produces<List<ClanWarPlayerSummaryDto>>();
 
-        group.MapGet("/players", async (IAppDbContext dbContext) =>
+        versionedGroup.MapGet("/players/summary", async (IAppDbContext dbContext) =>
             {
                 var playerSummaries = await dbContext.ClanMembers
                     .Include(member => member.SeasonStats)
@@ -41,13 +41,14 @@ public static class SummaryEndpoints
                     .Include(member => member.ClanWarLeaguesPlayerSummaries)
                     .ProjectToDto()
                     .AsSplitQuery().ToListAsync();
-                return TypedResults.Ok(playerSummaries);
+                return Results.Ok(playerSummaries);
             })
             .WithName("get_player_summaries")
             .WithSummary("Получить полную статистику игрока")
-            .WithDescription("Возвращает накопленную за всё время статистику игрока");
+            .WithDescription("Возвращает накопленную за всё время статистику игрока")
+            .Produces<List<ClanMemberSummaryDto>>();
 
-        group.MapGet("/cwl/players", async Task<IResult> (
+        versionedGroup.MapGet("/cwl/players/summary", async Task<IResult> (
                 [Description("Сезон в формате ГГГГ-ММ (например, 2026-05). Необязательный.")]
                 string? season,
                 IAppDbContext dbContext) =>
@@ -62,7 +63,7 @@ public static class SummaryEndpoints
 
                     if (season == null)
                     {
-                        return TypedResults.Ok(Enumerable.Empty<ClanWarLeaguesPlayerSummaryDto>());
+                        return Results.Ok(Enumerable.Empty<ClanWarLeaguesPlayerSummaryDto>());
                     }
                 }
 
@@ -71,7 +72,7 @@ public static class SummaryEndpoints
                     .ProjectToDto()
                     .ToListAsync();
 
-                return TypedResults.Ok(summaries);
+                return Results.Ok(summaries);
             })
             .WithName("get_cwl_player_summaries")
             .WithSummary("Получить статистику игроков в ЛВК за сезон")
@@ -79,18 +80,36 @@ public static class SummaryEndpoints
                 "Возвращает агрегированную статистику игроков за конкретный сезон ЛВК. Если сезон не указан, возвращает данные за самый свежий доступный сезон.")
             .Produces<List<ClanWarLeaguesPlayerSummaryDto>>();
 
-        group.MapGet("/cwl/groups", async (IAppDbContext dbContext) =>
+        versionedGroup.MapGet("/cwl/groups/summary", async (IAppDbContext dbContext) =>
             {
                 var groupSummaries = await dbContext.ClanWarLeagueGroupSummaries
                     .OrderByDescending(x => x.Season)
                     .ProjectToDto()
                     .ToListAsync();
 
-                return TypedResults.Ok(groupSummaries);
+                return Results.Ok(groupSummaries);
             })
             .WithName("get_cwl_group_summaries")
             .WithSummary("Получить историю сезонов ЛВК")
             .WithDescription("Возвращает общую статистику клана по всем историческим сезонам ЛВК (места, победы, разрушений).")
             .Produces<List<ClanWarLeagueGroupSummaryDto>>();
+
+        versionedGroup.MapGet("/player/activity-chart/{tag}", async (
+                string tag,
+                DateTimeOffset? start,
+                DateTimeOffset? end,
+                IPlayerActivityService activityService) =>
+            {
+                var actualEnd = end ?? DateTimeOffset.UtcNow;
+                var actualStart = start ?? actualEnd.AddDays(-30);
+
+                var chartData = await activityService.GetNormalizedMemberChartAsync(tag, actualStart, actualEnd);
+
+                return Results.Ok(chartData);
+            })
+            .WithName("get_player_activity_chart")
+            .WithSummary("Получить график активности игрока")
+            .WithDescription("Возвращает график активности игрока за определенный период.")
+            .Produces<List<ChartPointDto>>();
     }
 }
