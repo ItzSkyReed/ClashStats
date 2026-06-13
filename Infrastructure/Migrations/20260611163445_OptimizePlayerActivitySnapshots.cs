@@ -10,9 +10,14 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ActivityScore",
-                table: "player_activity_snapshots");
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN 
+                    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'player_activity_snapshots') THEN
+                        ALTER TABLE player_activity_snapshots DROP COLUMN IF EXISTS ""ActivityScore"";
+                    END IF;
+                END $$;
+            ");
 
             migrationBuilder.AddColumn<int>(
                 name: "ActivityStateMemberInternalId",
@@ -69,12 +74,16 @@ namespace Infrastructure.Migrations
                 name: "ActivityStateMemberInternalId",
                 table: "clan_members");
 
-            migrationBuilder.AddColumn<long>(
-                name: "ActivityScore",
-                table: "player_activity_snapshots",
-                type: "bigint",
-                nullable: false,
-                defaultValue: 0L);
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN 
+                    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'player_activity_snapshots') THEN
+                        IF NOT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'player_activity_snapshots' AND column_name = 'ActivityScore') THEN
+                            ALTER TABLE player_activity_snapshots ADD COLUMN ""ActivityScore"" bigint NOT NULL DEFAULT 0;
+                        END IF;
+                    END IF;
+                END $$;
+            ");
         }
     }
 }
