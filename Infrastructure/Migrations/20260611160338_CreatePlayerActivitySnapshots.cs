@@ -10,22 +10,6 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"
-                DO $$ 
-                BEGIN 
-                    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'player_activity_snapshots') THEN
-                        
-                        ALTER TABLE player_activity_snapshots 
-                        DROP CONSTRAINT IF EXISTS ""FK_player_activity_snapshots_clan_members_ClanMemberTag"";
-
-
-                        DROP INDEX IF EXISTS ""IX_player_activity_snapshots_ClanMemberTag"";
-                        ALTER TABLE player_activity_snapshots 
-                        DROP COLUMN IF EXISTS ""ClanMemberTag"";
-
-                    END IF;
-                END $$;
-            ");
         }
 
         /// <inheritdoc />
