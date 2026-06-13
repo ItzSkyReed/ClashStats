@@ -34,6 +34,6 @@ public record ClanMemberSummaryDto
 
     public required List<SeasonStatsDto> SeasonStats { get; set; }
 
-    public List<ClanWarLeaguesPlayerSummaryDto> ClanWarLeaguesPlayerSummaries { get; set; } = null!;
-    public ClanWarPlayerSummaryDto ClanWarPlayerSummary { get; set; } = null!;
+    public List<ClanWarLeaguesPlayerSummaryDto>? ClanWarLeaguesPlayerSummaries { get; set; }
+    public ClanWarPlayerSummaryDto? ClanWarPlayerSummary { get; set; }
 }
