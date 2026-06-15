@@ -21,10 +21,12 @@
                         @switch (Player.DonationHistoryValues.Length)
                         {
                             case > 1:
-                                <MudChart ChartType="ChartType.Line"
-                                          ChartSeries="@Player.DonationChartSeries"
-                                          ChartLabels="@Player.DonationHistoryLabels"
-                                          Width="100%" Height="250px"/>
+                                <MudItem xs="12" Class="d-flex justify-start">
+                                    <MudChart ChartType="ChartType.Bar"
+                                              ChartSeries="@Player.DonationChartSeries"
+                                              ChartLabels="@Player.DonationHistoryLabels"
+                                              Width="100%" Height="350px"/>
+                                </MudItem>
                                 break;
                             case 1:
                                 <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined" Class="mt-2 mx-auto" Style="max-width: 400px;">
@@ -167,7 +169,7 @@
 
                 <div style="width: 100%; overflow-x: auto; padding-bottom: 8px;">
                     <div style="min-width: 1000px;">
-                        <MudChart ChartType="ChartType.Line"
+                        <MudChart ChartType="ChartType.Bar"
                                   ChartSeries="@_activitySeries"
                                   ChartLabels="@_activityLabels"
                                   Width="100%"
