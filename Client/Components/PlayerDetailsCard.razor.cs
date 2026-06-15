@@ -45,8 +45,8 @@ partial class PlayerDetailsCard
 
                 _activitySubtitle = totalDays switch
                 {
-                    < 1 => $"Примерный онлайн за {earliestDate:dd.MM.yyyy}",
-                    _ => $"Примерный онлайн за {totalDays} дн. ({earliestDate:dd.MM} — {latestDate:dd.MM})"
+                    < 1 => $"Онлайн за {earliestDate:dd.MM.yyyy}",
+                    _ => $"Онлайн за {totalDays} дн. ({earliestDate:dd.MM} — {latestDate:dd.MM})"
                 };
 
                 _activitySeries =
