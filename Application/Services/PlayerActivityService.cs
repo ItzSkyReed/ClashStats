@@ -91,35 +91,41 @@ public class PlayerActivityService(IAppDbContext dbContext) : IPlayerActivitySer
 
         return timeSpan.TotalDays switch
         {
-            > 14 => await query.GroupBy(x => x.SnapshotTime.Date)
-                .Select(g => new ChartPointDto
+            > 14 => (await query
+                    .GroupBy(x => x.SnapshotTime.Date)
+                    .Select(g => new { Date = g.Key, Score = g.Count() })
+                    .ToListAsync())
+                .Select(x => new ChartPointDto
                 {
-                    Time = g.Key, ActivityScore = g.Count() // Сколько раз засветился в этот день
+                    Time = new DateTimeOffset(x.Date, TimeSpan.Zero),
+                    ActivityScore = x.Score
                 })
                 .OrderBy(x => x.Time)
-                .ToListAsync(),
+                .ToList(),
 
-            >= 2 => await query.GroupBy(x => new
-                    { x.SnapshotTime.Year, x.SnapshotTime.Month, x.SnapshotTime.Day, x.SnapshotTime.Hour })
-                .Select(g => new ChartPointDto
+            >= 2 => (await query
+                    .GroupBy(x => new { x.SnapshotTime.Year, x.SnapshotTime.Month, x.SnapshotTime.Day, x.SnapshotTime.Hour })
+                    .Select(g => new { g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, Score = g.Count() })
+                    .ToListAsync())
+                .Select(x => new ChartPointDto
                 {
-                    Time = new DateTimeOffset(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, 0, 0, TimeSpan.Zero),
-                    ActivityScore = g.Count() // Сколько раз засветился за час
+                    Time = new DateTimeOffset(x.Year, x.Month, x.Day, x.Hour, 0, 0, TimeSpan.Zero),
+                    ActivityScore = x.Score
                 })
                 .OrderBy(x => x.Time)
-                .ToListAsync(),
+                .ToList(),
 
-            _ => await query.GroupBy(x => new
+            _ => (await query
+                    .GroupBy(x => new { x.SnapshotTime.Year, x.SnapshotTime.Month, x.SnapshotTime.Day, x.SnapshotTime.Hour, x.SnapshotTime.Minute })
+                    .Select(g => new { g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, g.Key.Minute, Score = g.Count() })
+                    .ToListAsync())
+                .Select(x => new ChartPointDto
                 {
-                    x.SnapshotTime.Year, x.SnapshotTime.Month, x.SnapshotTime.Day, x.SnapshotTime.Hour, x.SnapshotTime.Minute
-                })
-                .Select(g => new ChartPointDto
-                {
-                    Time = new DateTimeOffset(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, g.Key.Minute, 0, TimeSpan.Zero),
-                    ActivityScore = g.Count()
+                    Time = new DateTimeOffset(x.Year, x.Month, x.Day, x.Hour, x.Minute, 0, TimeSpan.Zero),
+                    ActivityScore = x.Score
                 })
                 .OrderBy(x => x.Time)
-                .ToListAsync()
+                .ToList()
         };
     }
 
