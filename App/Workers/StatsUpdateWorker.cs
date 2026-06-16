@@ -67,7 +67,16 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
             collector => collector.CleanupStuckWars(ct),
             "StuckWars", ct);
 
-        await Task.WhenAll(clanMembersTask, seasonStatsTask, clanWarTask, cleanupStuckWarsTask, clanLeagueWarsTask, playerActivityTask);
+        var clanSnapshotsTask = RunDailyTaskAsync(
+            new TimeSpan(3, 0, 0),
+            collector => collector.UpdateClanStatsSnapshot(ct),
+            "ClanDailySnapshots",
+            ct,
+            shouldExecute: collector => collector.IsClanSnapshotCaptured(DateOnly.FromDateTime(DateTime.UtcNow), ct)
+        );
+
+        await Task.WhenAll(clanMembersTask, seasonStatsTask, clanWarTask, cleanupStuckWarsTask, clanLeagueWarsTask, playerActivityTask,
+            clanSnapshotsTask);
     }
 
     private async Task RunTaskWithTimerAsync(TimeSpan period, Func<IClanDataSyncService, Task> action, string taskName, CancellationToken ct)
@@ -99,6 +108,107 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
         }
     }
 
+    private async Task RunDailyTaskAsync(
+        TimeSpan targetTimeOfDay,
+        Func<IClanDataSyncService, Task> action,
+        string taskName,
+        CancellationToken ct,
+        Func<IClanDataSyncService, Task<bool>>? shouldExecute = null)
+    {
+        // Флаг, чтобы сделать проверку пропущенного запуска только один раз при старте
+        var isFirstCheckAfterStart = true;
+
+        try
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                var now = DateTime.UtcNow;
+                var nextRun = now.Date.Add(targetTimeOfDay);
+                TimeSpan delay;
+
+                // Если это первый запуск И целевое время на сегодня уже прошло
+                if (isFirstCheckAfterStart && now >= nextRun)
+                {
+                    isFirstCheckAfterStart = false;
+
+                    // Проверяем, выполнялась ли задача сегодня
+                    var alreadyExecutedToday = false;
+                    if (shouldExecute != null)
+                    {
+                        using var scope = serviceProvider.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<IClanDataSyncService>();
+                        alreadyExecutedToday = await shouldExecute(service);
+                    }
+
+                    if (!alreadyExecutedToday)
+                    {
+                        // Если сегодня НЕ выполнялась — запускаем мгновенно, без ожидания
+                        delay = TimeSpan.Zero;
+                        LogTaskTaskNameDailyCatchingUp(taskName);
+                    }
+                    else
+                    {
+                        nextRun = nextRun.AddDays(1);
+                        delay = nextRun - now;
+                    }
+                }
+                else
+                {
+                    isFirstCheckAfterStart = false;
+                    if (now >= nextRun)
+                    {
+                        nextRun = nextRun.AddDays(1);
+                    }
+
+                    delay = nextRun - now;
+                }
+
+                if (delay > TimeSpan.Zero)
+                {
+                    LogTaskTaskNameScheduledNextRun(taskName, nextRun, delay.TotalHours);
+                    await Task.Delay(delay, ct);
+                }
+
+                // Выполнение самой таски
+                try
+                {
+                    LogExecutingBackgroundTaskTaskName(taskName);
+
+                    using var scope = serviceProvider.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<IClanDataSyncService>();
+
+                    if (shouldExecute != null)
+                    {
+                        var alreadyExecuted = await shouldExecute(service);
+                        if (alreadyExecuted)
+                        {
+                            LogTaskTaskNameDailySkipped(taskName);
+                            continue;
+                        }
+                    }
+
+                    await action(service);
+                }
+                catch (Exception ex)
+                {
+                    LogErrorExecutingTaskTaskName(taskName, ex);
+                }
+
+                LogTaskTaskNameCompleted(taskName);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            LogStoppingTaskTaskName(taskName);
+        }
+    }
+
+    [LoggerMessage(LogLevel.Information, "Catching up daily skipped task: {TaskName}")]
+    partial void LogTaskTaskNameDailyCatchingUp(string taskName);
+
+    [LoggerMessage(LogLevel.Information, "Skipped daily task: {TaskName}")]
+    partial void LogTaskTaskNameDailySkipped(string taskName);
+
     [LoggerMessage(LogLevel.Information, "Executing background task: {TaskName}")]
     partial void LogExecutingBackgroundTaskTaskName(string taskName);
 
@@ -110,4 +220,7 @@ public partial class StatsUpdateWorker(ILogger<StatsUpdateWorker> logger, IServi
 
     [LoggerMessage(LogLevel.Information, "Task {taskName} completed")]
     partial void LogTaskTaskNameCompleted(string taskName);
+
+    [LoggerMessage(LogLevel.Information, "Task {TaskName} scheduled. Next run at: {NextRun} (in {DelayHours} hours)")]
+    partial void LogTaskTaskNameScheduledNextRun(string taskName, DateTime nextRun, double delayHours);
 }

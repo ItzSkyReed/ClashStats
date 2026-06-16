@@ -10,6 +10,7 @@ using Domain.Constants;
 using Domain.Models;
 using Domain.Models.ClanWarLeagues;
 using Domain.Models.ClanWars;
+using Domain.Models.Statistics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -344,6 +345,34 @@ public partial class ClanDataSyncService(
         await dbContext.SaveChangesAsync(ct);
 
         LogAddedCountNewActivitySnapshots(snapshotsToInsert.Count);
+    }
+
+    public async Task UpdateClanStatsSnapshot(CancellationToken ct)
+    {
+        var clanData = await apiClient.GetClanAsync(clanTag, ct).UnwrapOrLogAsync(logger);
+        if (clanData is null) return;
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        if (await IsClanSnapshotCaptured(today, ct))
+            return;
+
+        var snapshot = new ClanStatsSnapshot
+        {
+            ClanTag = clanData.Tag
+        };
+        snapshot.UpdateFromClanDto(clanData, today);
+
+        dbContext.ClanStatsSnapshots.Add(snapshot);
+
+        await dbContext.SaveChangesAsync(ct);
+    }
+
+    public async Task<bool> IsClanSnapshotCaptured(DateOnly date, CancellationToken ct)
+    {
+        var snapshot = await dbContext.ClanStatsSnapshots.SingleOrDefaultAsync(x => x.CapturedAt == date, ct);
+
+        return snapshot is not null;
     }
 
     private async Task SyncLeagueGroupAsync(ClanWarLeagueGroupDto leagueGroup, CancellationToken ct)

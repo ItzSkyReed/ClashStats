@@ -10,4 +10,6 @@ public interface IClanDataSyncService
     public Task CleanupStuckWars(CancellationToken ct);
     public Task<bool> UpdateClanLeagueWars(CancellationToken ct);
     public Task UpdateActivitySnapshots(CancellationToken ct);
+    public Task UpdateClanStatsSnapshot(CancellationToken ct);
+    public Task<bool> IsClanSnapshotCaptured(DateOnly today, CancellationToken ct);
 }

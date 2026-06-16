@@ -1,10 +1,12 @@
-﻿using Application.ClashOfClansModels.Clans.ClanWarLeagues;
+﻿using Application.ClashOfClansModels.Clans;
+using Application.ClashOfClansModels.Clans.ClanWarLeagues;
 using Application.ClashOfClansModels.Clans.ClanWars;
 using Application.ClashOfClansModels.Players;
 using Domain.Constants;
 using Domain.Models;
 using Domain.Models.ClanWarLeagues;
 using Domain.Models.ClanWars;
+using Domain.Models.Statistics;
 
 namespace Application.Extensions;
 
@@ -76,6 +78,33 @@ public static class ClanModelsMappingExtensions
         entity.OurAttacks = (short)our.Attacks!;
         entity.OurStars = (short)our.Stars;
         entity.OurDestructionPercentage = our.DestructionPercentage;
+    }
+
+    public static void UpdateFromClanDto(this ClanStatsSnapshot entity, in ClanDto apiData, DateOnly today)
+    {
+        entity.ClanTag = apiData.Tag;
+        entity.CapturedAt = today;
+
+        entity.ClanLevel = (short)apiData.ClanLevel;
+        entity.ClanPoints = apiData.ClanPoints;
+        entity.ClanBuilderBasePoints = apiData.ClanBuilderBasePoints;
+        entity.ClanCapitalPoints = (short)apiData.ClanCapitalPoints;
+
+        entity.WarLeagueName = apiData.WarLeague.Name;
+        entity.WarLeagueId = apiData.WarLeague.Id;
+        entity.CapitalLeagueName = apiData.CapitalLeague.Name;
+        entity.CapitalLeagueId = apiData.CapitalLeague.Id;
+
+        entity.WarWinStreak = (short)apiData.WarWinStreak;
+        entity.WarWins = (short)apiData.WarWins;
+        entity.WarTies = (short)apiData.WarTies;
+        entity.WarLosses = (short)apiData.WarLosses;
+
+        entity.MembersCount = (short)apiData.Members;
+        entity.AverageTownHallLevel = (float)apiData.MemberList.Average(x => x.TownHallLevel);
+
+        entity.RequiredTrophies = (short)apiData.RequiredTrophies;
+        entity.RequiredTownHallLevel = (short)apiData.RequiredTownhallLevel;
     }
 
     extension(ClanWar entity)
