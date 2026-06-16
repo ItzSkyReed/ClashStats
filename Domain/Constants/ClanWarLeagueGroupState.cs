@@ -10,6 +10,7 @@ public sealed class ClanWarLeagueGroupState : SmartEnum<ClanWarLeagueGroupState,
     public static readonly ClanWarLeagueGroupState GroupNotFound = new(nameof(GroupNotFound), "groupNotFound");
     public static readonly ClanWarLeagueGroupState Preparation = new(nameof(Preparation), "preparation");
     public static readonly ClanWarLeagueGroupState InWar = new(nameof(InWar), "inWar");
+    public static readonly ClanWarLeagueGroupState NotInWar = new(nameof(NotInWar), "notInWar");
     public static readonly ClanWarLeagueGroupState Ended = new(nameof(Ended), "ended");
 
     private ClanWarLeagueGroupState(string name, string value) : base(name, value)
