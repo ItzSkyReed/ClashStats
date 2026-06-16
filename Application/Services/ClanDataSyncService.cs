@@ -27,9 +27,7 @@ public partial class ClanDataSyncService(
     public async Task UpdateClanMembers(CancellationToken ct)
     {
         var clanMembers = await apiClient.GetClanMembersAsync(clanTag, cancellationToken: ct).UnwrapOrLogAsync(logger);
-
-        if (clanMembers is null)
-            return;
+        if (clanMembers is null) return;
 
         var currentTags = clanMembers.Items.Select(m => m.Tag).ToHashSet();
 
@@ -76,9 +74,7 @@ public partial class ClanDataSyncService(
     public async Task UpdateSeasonStats(CancellationToken ct)
     {
         var leagueData = await apiClient.GetLeagueSeasonsAsync(cancellationToken: ct).UnwrapOrLogAsync(logger);
-
-        if (leagueData is null)
-            return;
+        if (leagueData is null) return;
 
         var parsedDateTime = DateTimeOffset.ParseExact(
             leagueData.Items[^1].Id,
