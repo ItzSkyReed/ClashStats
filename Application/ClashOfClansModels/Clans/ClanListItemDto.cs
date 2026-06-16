@@ -4,7 +4,7 @@ using Application.ClashOfClansModels.Locations;
 
 namespace Application.ClashOfClansModels.Clans;
 
-public record ClanDto
+public record ClanListItemDto
 {
     public required string Tag { get; init; }
     public required string Name { get; init; }
@@ -33,7 +33,6 @@ public record ClanDto
     public required int WarLosses { get; init; }
     public required bool IsWarLogPublic { get; init; }
     public required int Members { get; init; }
-    public required List<ClanMemberDto> MemberList { get; init; }
 
     public required LocationDto Location { get; init; }
     public required ChatLanguageDto ChatLanguage { get; init; }
