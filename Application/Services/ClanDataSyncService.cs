@@ -64,9 +64,7 @@ public partial class ClanDataSyncService(
                 }
             }
             else if (item.Result.Error is { } error)
-            {
-                logger.LogError("Api error while updating player {Tag}: {ErrorMessage}", item.Tag, error.Message);
-            }
+                LogApiErrorWhileUpdatingPlayerTag(item.Tag, error.Message);
         }
 
         await dbContext.SaveChangesAsync(ct);
@@ -86,8 +84,7 @@ public partial class ClanDataSyncService(
         var latestSeason = DateOnly.FromDateTime(parsedDateTime.UtcDateTime);
 
         var clanMembers = await apiClient.GetClanMembersAsync(clanTag, cancellationToken: ct).UnwrapOrLogAsync(logger);
-        if (clanMembers is null)
-            return;
+        if (clanMembers is null) return;
 
         var apiMemberTags = clanMembers.Items.Select(m => m.Tag).ToList();
 
@@ -117,7 +114,6 @@ public partial class ClanDataSyncService(
                     Donations = member.Donations,
                     DonationsReceived = member.DonationsReceived
                 };
-
                 dbContext.SeasonStats.Add(newStat);
             }
         }
@@ -230,7 +226,7 @@ public partial class ClanDataSyncService(
 
         if (warLog is null)
         {
-            logger.LogError("Stuck wars were found, but server failed to get war log");
+            LogStuckWarsFoundButFailedToGetWarLog();
             return;
         }
 
@@ -260,12 +256,11 @@ public partial class ClanDataSyncService(
     {
         var leagueResult = await apiClient.GetCurrentClanWarLeagueGroupAsync(clanTag, ct);
 
-        if (leagueResult.StatusCode == HttpStatusCode.NotFound)
-            return false;
+        if (leagueResult.StatusCode == HttpStatusCode.NotFound) return false;
 
         if (leagueResult.Error != null)
         {
-            logger.LogError("Api error while getting league group: {ErrorMessage}", leagueResult.Error.Message);
+            LogApiErrorWhileGettingLeagueGroup(leagueResult.Error.Message);
             return false; // Если ошибка, дальше идти нет смысла
         }
 
@@ -506,4 +501,13 @@ public partial class ClanDataSyncService(
 
     [LoggerMessage(LogLevel.Information, "Added {Count} new activity snapshots")]
     partial void LogAddedCountNewActivitySnapshots(int count);
+
+    [LoggerMessage(LogLevel.Error, "Api error while updating player {Tag}: {ErrorMessage}")]
+    partial void LogApiErrorWhileUpdatingPlayerTag(string tag, string? errorMessage);
+
+    [LoggerMessage(LogLevel.Error, "Stuck wars were found, but server failed to get war log")]
+    partial void LogStuckWarsFoundButFailedToGetWarLog();
+
+    [LoggerMessage(LogLevel.Error, "Api error while getting league group: {ErrorMessage}")]
+    partial void LogApiErrorWhileGettingLeagueGroup(string? errorMessage);
 }
