@@ -113,7 +113,7 @@ public partial class ClanDataSyncService(
 
             else
             {
-                var newStat = new SeasonStats
+                var newStat = new PlayerSeasonStats
                 {
                     SeasonDate = latestSeason,
                     PlayerTag = member.Tag,

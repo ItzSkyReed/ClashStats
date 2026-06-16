@@ -1,4 +1,4 @@
-﻿using Domain.Models;
+﻿using Domain.Models.Statistics;
 using Riok.Mapperly.Abstractions;
 using Shared.DTOs.Statistics;
 
@@ -7,9 +7,9 @@ namespace Application.Mappings;
 [Mapper]
 public static partial class SeasonStatsMapper
 {
-    [MapperIgnoreSource(nameof(SeasonStats.PlayerTag))]
-    [MapperIgnoreSource(nameof(SeasonStats.Player))]
-    public static partial SeasonStatsDto ToDto(this SeasonStats clanWarPlayerSummary);
+    [MapperIgnoreSource(nameof(PlayerSeasonStats.PlayerTag))]
+    [MapperIgnoreSource(nameof(PlayerSeasonStats.Player))]
+    public static partial SeasonStatsDto ToDto(this PlayerSeasonStats clanWarPlayerSummary);
 
-    public static partial IQueryable<SeasonStatsDto> ProjectToDto(this IQueryable<SeasonStats> query);
+    public static partial IQueryable<SeasonStatsDto> ProjectToDto(this IQueryable<PlayerSeasonStats> query);
 }

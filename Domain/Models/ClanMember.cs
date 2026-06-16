@@ -3,6 +3,7 @@ using Domain.Models.Analytics.ClanWarLeagues;
 using Domain.Models.Analytics.ClanWars;
 using Domain.Models.ClanWarLeagues;
 using Domain.Models.ClanWars;
+using Domain.Models.Statistics;
 
 namespace Domain.Models;
 
@@ -29,7 +30,7 @@ public record ClanMember
     public required bool IsNowInClan { get; set; }
     public WarPreference? WarPreference { get; set; }
 
-    public ICollection<SeasonStats>? SeasonStats { get; set; } = new List<SeasonStats>();
+    public ICollection<PlayerSeasonStats>? SeasonStats { get; set; } = new List<PlayerSeasonStats>();
 
     public ICollection<ClanWarPlayerPerformance>? ClanWarPerformances { get; set; } = new List<ClanWarPlayerPerformance>();
     public ICollection<ClanWarLeaguePlayerPerformance>? ClanWarLeaguePerformances { get; set; } = new List<ClanWarLeaguePlayerPerformance>();

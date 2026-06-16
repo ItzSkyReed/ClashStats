@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Domain.Models;
+namespace Domain.Models.Statistics;
 
-public record SeasonStats
+public record PlayerSeasonStats
 {
     public DateOnly SeasonDate { get; set; }
     public required string PlayerTag { get; set; }

@@ -1,12 +1,12 @@
-﻿using Domain.Models;
+﻿using Domain.Models.Statistics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Persistence.Configurations.Clan;
 
-public class SeasonStatsConfiguration : IEntityTypeConfiguration<SeasonStats>
+public class SeasonStatsConfiguration : IEntityTypeConfiguration<PlayerSeasonStats>
 {
-    public void Configure(EntityTypeBuilder<SeasonStats> builder)
+    public void Configure(EntityTypeBuilder<PlayerSeasonStats> builder)
     {
         builder.ToTable("season_stats");
 

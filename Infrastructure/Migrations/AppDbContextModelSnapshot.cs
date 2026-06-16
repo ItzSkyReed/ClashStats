@@ -630,6 +630,7 @@ namespace Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Domain.Models.SeasonStats", b =>
+            modelBuilder.Entity("Domain.Models.Statistics.PlayerSeasonStats", b =>
                 {
                     b.Property<DateOnly>("SeasonDate")
                         .HasColumnType("date");
@@ -754,7 +755,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("Domain.Models.SeasonStats", b =>
+            modelBuilder.Entity("Domain.Models.Statistics.PlayerSeasonStats", b =>
                 {
                     b.HasOne("Domain.Models.ClanMember", "Player")
                         .WithMany("SeasonStats")
